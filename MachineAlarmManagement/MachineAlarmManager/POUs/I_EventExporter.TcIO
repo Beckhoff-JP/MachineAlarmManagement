@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <Itf Name="I_EventExporter" Id="{4f3cef88-0c03-433a-a68e-c25d8f9a39f1}">
+    <Declaration><![CDATA[INTERFACE I_EventExporter
+]]></Declaration>
+    <Method Name="execute" Id="{faba33dd-68ba-4f6c-9ed8-9ff726582aa0}">
+      <Declaration><![CDATA[METHOD execute : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+    </Method>
+    <Property Name="lang_code" Id="{c47c7237-b419-4941-a74d-de8f2dc1347e}">
+      <Declaration><![CDATA[PROPERTY lang_code : DINT]]></Declaration>
+      <Get Name="Get" Id="{870b92bc-bc9c-4b20-b11c-8e7308bd81a8}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+      <Set Name="Set" Id="{77b78c7a-9dd8-47cd-beb6-4efc406ccfd2}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Set>
+    </Property>
+    <Method Name="send_signal" Id="{3d4aab7e-3102-477b-bc85-53b61297b67a}">
+      <Declaration><![CDATA[METHOD send_signal : BOOL
+VAR_INPUT
+	pAlarm		: POINTER TO FB_Alarm;
+END_VAR
+]]></Declaration>
+    </Method>
+  </Itf>
+</TcPlcObject>

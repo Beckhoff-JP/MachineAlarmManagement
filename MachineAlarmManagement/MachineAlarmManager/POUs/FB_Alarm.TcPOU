@@ -1,0 +1,98 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_Alarm" Id="{fd59e4a9-d269-4936-83d6-88a7cff9a7f1}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Alarm EXTENDS FB_TcAlarm
+VAR_INPUT
+	bEvt		: BOOL;				// Set true during something event occured.
+	module_name :STRING;			// module name where event occured.
+	bConfirm	: BOOL;				// True momentally after operator confirming event.
+	bLatch		: BOOL := FALSE;	// Keep alarm status raised after bEvt being FALSE.
+	bReset		: BOOL := FALSE;	// When the bLatch flag is True and bEvt is False, this flag can be unlatch when raised. 
+END_VAR
+VAR_OUTPUT
+	event_raised	:BOOL;			// Set true during alarm event is activated
+	event_cleared	:BOOL;			// Set true at 1 cycle when event would be deactivated.
+	event_confirmed	:BOOL;			// Set true at 1 cycle when event would be confirmed.
+END_VAR
+VAR
+	exist_wait_for_confirmation :BOOL;
+	bMemConfirmEvent :BOOL;
+	bMemEvt: BOOL;
+	bMemReset: BOOL;
+	bMemActive: BOOL;
+END_VAR
+
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF bEvt 
+	AND NOT bMemEvt 
+	AND SUPER^.eConfirmationState <> TcEventConfirmationState.WaitForConfirmation THEN
+	event_raised := TRUE;
+	SUPER^.Raise(0);
+ELSE
+	event_raised := FALSE;
+END_IF
+
+IF bConfirm THEN
+	SUPER^.Confirm(0);
+END_IF
+
+exist_wait_for_confirmation := SUPER^.eConfirmationState = TcEventConfirmationState.WaitForConfirmation;
+event_confirmed := exist_wait_for_confirmation AND NOT bMemConfirmEvent;
+
+IF bLatch THEN
+	IF NOT bEvt 
+		AND bReset 
+		AND NOT bMemReset 
+		AND NOT exist_wait_for_confirmation THEN
+		SUPER^.Clear(0, TRUE);
+	END_IF
+ELSE
+	IF bMemEvt AND NOT bEvt THEN
+		SUPER^.Clear(0, TRUE);
+	END_IF
+END_IF
+
+bMemEvt := bEvt;
+bMemReset := bReset;
+bMemConfirmEvent := exist_wait_for_confirmation;
+
+
+event_cleared := NOT SUPER^.bActive AND bMemActive;
+
+bMemActive := SUPER^.bActive;]]></ST>
+    </Implementation>
+    <Method Name="FB_init" Id="{dabcb318-47a7-4cd8-bc7f-b45edc1cf196}">
+      <Declaration><![CDATA[METHOD FB_init : BOOL
+VAR_INPUT
+	bInitRetains : BOOL; // if TRUE, the retain variables are initialized (warm start / cold start)
+	bInCopyCode : BOOL;  // if TRUE, the instance afterwards gets moved into the copy code (online change)
+	evtEntry	: TcEventEntry; // Specify event class and entry name
+	p_calculator : REFERENCE TO FB_AlarmCalculator; // Specify pointer to FB_AlarmCalculator.
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[p_calculator.reg_alarm(p_alarm := THIS);
+SUPER^.CreateEx(evtEntry, TRUE, 0);
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_Alarm">
+      <LineId Id="205" Count="21" />
+      <LineId Id="261" Count="0" />
+      <LineId Id="231" Count="2" />
+      <LineId Id="237" Count="4" />
+      <LineId Id="163" Count="0" />
+      <LineId Id="263" Count="0" />
+      <LineId Id="272" Count="0" />
+      <LineId Id="277" Count="0" />
+      <LineId Id="280" Count="0" />
+      <LineId Id="262" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Alarm.FB_init">
+      <LineId Id="7" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="10" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

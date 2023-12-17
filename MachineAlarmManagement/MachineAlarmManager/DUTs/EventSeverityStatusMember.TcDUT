@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="EventSeverityStatusMember" Id="{ac10f2f7-6be2-46ce-adae-1d1754498953}">
+    <Declaration><![CDATA[TYPE EventSeverityStatusMember :
+STRUCT
+	severity 	: TcEventSeverity;
+	raised		: BOOL;
+	confirmed	: BOOL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>
