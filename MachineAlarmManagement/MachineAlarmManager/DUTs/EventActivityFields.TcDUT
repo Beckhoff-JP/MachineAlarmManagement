@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="EventActivityFields" Id="{d7f0dc1d-8c88-4901-9e52-0fb38791d49f}">
+    <Declaration><![CDATA[TYPE EventActivityFields EXTENDS DataTag:
+STRUCT
+	{attribute 'TagName' := 'uuid'}
+    uuid : STRING;
+	{attribute 'FieldName' := 'event_id'}
+    event_id : STRING;
+	{attribute 'FieldName' := 'severity'}
+	severity: INT;
+	{attribute 'TcEncoding' := 'UTF-8'}
+	{attribute 'FieldName' := 'text'}
+    text : STRING;
+	{attribute 'FieldName' := 'status'}
+    status : BOOL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

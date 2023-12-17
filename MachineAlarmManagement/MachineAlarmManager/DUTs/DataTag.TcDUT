@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="DataTag" Id="{0ab55ead-4543-4a85-afed-636ac6c930a0}">
+    <Declaration><![CDATA[TYPE DataTag :
+STRUCT
+	{attribute 'TagName' := 'machine_id'}
+    machine_id : STRING;
+	{attribute 'TagName' := 'module_name'}
+    module_name: STRING;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <FileVersion>1.0.0.0</FileVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{2e705217-a9b8-44ed-bb1e-60d6ed1d9ba4}</ProjectGuid>
+    <SubObjectsSortedByName>True</SubObjectsSortedByName>
+    <DownloadApplicationInfo>true</DownloadApplicationInfo>
+    <WriteProductVersion>true</WriteProductVersion>
+    <GenerateTpy>false</GenerateTpy>
+    <Name>MachineAlarmManager</Name>
+    <ProgramVersion>3.1.4024.0</ProgramVersion>
+    <Application>{4d641d32-e511-4898-b224-db5a5c8ec7fd}</Application>
+    <TypeSystem>{401e2917-abeb-47b7-a29a-2a5596372efe}</TypeSystem>
+    <Implicit_Task_Info>{8afc005a-ecdd-495a-97e0-ba9fc26b865c}</Implicit_Task_Info>
+    <Implicit_KindOfTask>{e29c63cf-2b53-42cf-9887-6e7f6d1662a4}</Implicit_KindOfTask>
+    <Implicit_Jitter_Distribution>{5404cbde-6530-4524-8b11-9cd8b05889a9}</Implicit_Jitter_Distribution>
+    <LibraryReferences>{cd21dfe6-3c37-4f0c-8575-289ac4e7ef61}</LibraryReferences>
+    <Company>Beckhoff Automation K.K.</Company>
+    <Released>false</Released>
+    <Title>Machine Alarm Event Manager</Title>
+    <ProjectVersion>1.0.0.0</ProjectVersion>
+    <LibraryCategories>
+      <LibraryCategory>
+        <Id>{f484dac6-21b6-4d52-a832-fa3cc2ceea83}</Id>
+        <Version>1.0.0.0</Version>
+        <DefaultName>Beckhoff-JP</DefaultName>
+      </LibraryCategory>
+      <LibraryCategory>
+        <Id>{e42e9899-3114-40a3-911f-5f44e2769932}</Id>
+        <Version>1.0.0.0</Version>
+        <ParentCategory>
+          <Id>{f484dac6-21b6-4d52-a832-fa3cc2ceea83}</Id>
+        </ParentCategory>
+        <DefaultName>SystemDiagnostics</DefaultName>
+      </LibraryCategory>
+      <LibraryCategory>
+        <Id>{1547e2ea-7ffb-4c94-becc-56f97d1a03bd}</Id>
+        <Version>1.0.0.0</Version>
+        <ParentCategory>
+          <Id>{e42e9899-3114-40a3-911f-5f44e2769932}</Id>
+        </ParentCategory>
+        <DefaultName>IPCPerformance</DefaultName>
+      </LibraryCategory>
+      <LibraryCategory>
+        <Id>{ebb42e0a-ab3e-4c49-880e-9e854060901d}</Id>
+        <Version>1.0.0.0</Version>
+        <ParentCategory>
+          <Id>{f484dac6-21b6-4d52-a832-fa3cc2ceea83}</Id>
+        </ParentCategory>
+        <DefaultName>Utility</DefaultName>
+      </LibraryCategory>
+      <LibraryCategory>
+        <Id>{ab7100c0-0ae5-4ef5-9877-820273efdc4e}</Id>
+        <Version>1.0.0.0</Version>
+        <ParentCategory>
+          <Id>{ebb42e0a-ab3e-4c49-880e-9e854060901d}</Id>
+        </ParentCategory>
+        <DefaultName>DataBase</DefaultName>
+      </LibraryCategory>
+      <LibraryCategory>
+        <Id>{36e0796a-fe77-4402-a334-f23377a474d0}</Id>
+        <Version>1.0.0.0</Version>
+        <ParentCategory>
+          <Id>{ab7100c0-0ae5-4ef5-9877-820273efdc4e}</Id>
+        </ParentCategory>
+        <DefaultName>InfluxDB</DefaultName>
+      </LibraryCategory>
+    </LibraryCategories>
+    <SelectedLibraryCategories>
+      <Id>{ebb42e0a-ab3e-4c49-880e-9e854060901d}</Id>
+    </SelectedLibraryCategories>
+    <DefaultNamespace>bajp</DefaultNamespace>
+    <Author>Takashi Ichihashi</Author>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="DUTs\DataTag.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\EventActivityFields.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\EventSeverityStatusMember.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="GVLs\AlarmEventParam.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="GVLs\GVL.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="PlcTask.TcTTO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\FB_Alarm.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\FB_AlarmCalculator.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\FB_AlarmDBExporter.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\I_EventExporter.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\MAIN.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="DUTs" />
+    <Folder Include="GVLs" />
+    <Folder Include="VISUs" />
+    <Folder Include="POUs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PlaceholderReference Include="influxdb-client">
+      <DefaultResolution>influxdb-client, * (Beckhoff K.K. - Japan)</DefaultResolution>
+      <Namespace>tf6420</Namespace>
+    </PlaceholderReference>
+    <PlaceholderReference Include="Tc2_Standard">
+      <DefaultResolution>Tc2_Standard, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc2_Standard</Namespace>
+    </PlaceholderReference>
+    <PlaceholderReference Include="Tc2_System">
+      <DefaultResolution>Tc2_System, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc2_System</Namespace>
+    </PlaceholderReference>
+    <PlaceholderReference Include="Tc2_Utilities">
+      <DefaultResolution>Tc2_Utilities, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc2_Utilities</Namespace>
+    </PlaceholderReference>
+    <PlaceholderReference Include="Tc3_EventLogger">
+      <DefaultResolution>Tc3_EventLogger, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc3_EventLogger</Namespace>
+    </PlaceholderReference>
+    <PlaceholderReference Include="Tc3_Module">
+      <DefaultResolution>Tc3_Module, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc3_Module</Namespace>
+    </PlaceholderReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="MachineAlarmManager.tmc">
+      <SubType>Content</SubType>
+    </None>
+  </ItemGroup>
+  <ProjectExtensions>
+    <PlcProjectOptions>
+      <XmlArchive>
+        <Data>
+          <o xml:space="preserve" t="OptionKey">
+      <v n="Name">"&lt;ProjectRoot&gt;"</v>
+      <d n="SubKeys" t="Hashtable" />
+      <d n="Values" t="Hashtable" />
+    </o>
+        </Data>
+        <TypeList>
+          <Type n="Hashtable">System.Collections.Hashtable</Type>
+          <Type n="OptionKey">{54dd0eac-a6d8-46f2-8c27-2f43c7e49861}</Type>
+          <Type n="String">System.String</Type>
+        </TypeList>
+      </XmlArchive>
+    </PlcProjectOptions>
+  </ProjectExtensions>
+</Project>

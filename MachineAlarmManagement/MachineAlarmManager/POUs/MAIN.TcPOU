@@ -1,0 +1,86 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="MAIN" Id="{2bbb03aa-d457-41dc-adf0-3baf372f675a}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MAIN
+VAR
+
+	(* Alarm control *)	
+	// Alarm calculation function block
+	alarm_calculator    : FB_AlarmCalculator;	
+	// each alarm instances
+	fbTestAlarm1     : FB_Alarm(TC_Events.UserEventClass.test_alarm1, alarm_calculator);
+	fbTestAlarm2     : FB_Alarm(TC_Events.UserEventClass.test_alarm2, alarm_calculator);
+
+	(* For IoT *)
+	// Cycle record data
+	fbInfluxDBRecorder	:RecordInfluxDB(DBID := GVL.TARGET_DBID);
+	// For database export from event logger
+	data_buffer		: ARRAY [0..AlarmEventParam.EVENT_LOG_BUFFER_SIZE - 1] OF EventActivityFields;
+	queue_controller	: BufferedRecord(ADR(data_buffer), fbInfluxDBRecorder);		// record controller
+	alarm_db_exporter		: FB_AlarmDBExporter(ADR(queue_controller));
+	
+
+	(*User variables*)
+	// User alarm event
+	error_condition					: BOOL;
+	confirm_button_input		: BOOL;
+	reset_button_input			: BOOL;
+	is_error					: BOOL;
+	is_unconfirm				: BOOL;
+
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Database driver by TF6420
+fbInfluxDBRecorder();
+
+// Initialize alarm event calculatror and IoT service
+alarm_db_exporter.machine_name := 'Roll Dice demo';
+alarm_calculator.exporter := alarm_db_exporter;
+
+fbTestAlarm1(
+	bEvt := error_condition, // Activate event by alarm condition.
+	module_name := 'General', //module_name
+	bLatch := FALSE,   // Event will be stay active state after "bEvt" is fall down.
+	bConfirm := confirm_button_input, // Confirmation operation.
+	bReset := reset_button_input // Reset operation.
+);
+
+fbTestAlarm2(
+	bEvt := error_condition, // Activate event by alarm condition.
+	module_name := 'Loading module', //module_name
+	bLatch := FALSE,   // Event will be stay active state after "bEvt" is fall down.
+	bConfirm := confirm_button_input, // Confirmation operation.
+	bReset := reset_button_input // Reset operation.
+);
+
+// Set arguments if event item is required argument
+fbTestAlarm2.ipArguments.Clear().AddString('code').AddInt(1);
+
+// Alarm calculator
+alarm_calculator();
+is_error := alarm_calculator.is_raised(severity := TcEventSeverity.Warning); // Check active event which the severity more than 'Warning' level.
+is_unconfirm := alarm_calculator.is_unconfirmed(severity := TcEventSeverity.Warning); // Check confirmed event which the severity more than 'Warning' level.
+]]></ST>
+    </Implementation>
+    <LineIds Name="MAIN">
+      <LineId Id="156" Count="0" />
+      <LineId Id="129" Count="0" />
+      <LineId Id="131" Count="1" />
+      <LineId Id="134" Count="1" />
+      <LineId Id="137" Count="2" />
+      <LineId Id="214" Count="0" />
+      <LineId Id="140" Count="3" />
+      <LineId Id="180" Count="2" />
+      <LineId Id="215" Count="0" />
+      <LineId Id="183" Count="2" />
+      <LineId Id="179" Count="0" />
+      <LineId Id="163" Count="0" />
+      <LineId Id="144" Count="1" />
+      <LineId Id="159" Count="0" />
+      <LineId Id="161" Count="1" />
+      <LineId Id="147" Count="1" />
+      <LineId Id="37" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

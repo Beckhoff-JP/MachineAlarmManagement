@@ -1,0 +1,213 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_AlarmDBExporter" Id="{8bc61472-16bb-4769-ad40-cbce77b10d49}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_AlarmDBExporter IMPLEMENTS I_EventExporter
+VAR
+	_lang_code :DINT := 1033;
+	// For alarm IoT report
+	_queue_controller : POINTER TO BufferedRecord;
+	_machine_name	: STRING := 'Machine-1';
+	// for queue
+	_queue_usage	: UDINT;
+	_queue_size		: UDINT := AlarmEventParam.EVENT_LOG_BUFFER_SIZE;
+	nWriteIndex		: UDINT;
+	nReadIndex		: UDINT;
+	queue_buffer	: ARRAY [0..AlarmEventParam.EVENT_LOG_BUFFER_SIZE - 1] OF POINTER TO FB_Alarm;
+	{attribute 'TcEncoding' := 'UTF-8'}
+	event_text		: STRING;
+	event_entry		: TcEventEntry;	
+	_event_activity	: EventActivityFields;
+	pAlarm			: POINTER TO FB_Alarm;
+	_step 			: UINT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="execute" Id="{cd818fec-1129-4af5-86eb-7822aa752bc0}">
+      <Declaration><![CDATA[{warning 'add method implementation '}
+METHOD execute : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+CASE _step OF
+	0 :
+		IF _queue_usage > 0 THEN
+			pAlarm := q_get();
+			_step := 10;
+		END_IF
+	10:
+		IF pAlarm^.RequestEventText(
+				nLangID := _lang_code, sResult := event_text, nResultSize := SIZEOF(event_text)
+		) THEN
+			_step := 20;
+		END_IF
+	20:
+		event_entry := pAlarm^.stEventEntry;
+		_event_activity.machine_id := _machine_name;
+		_event_activity.module_name := pAlarm^.module_name;
+		_event_activity.event_id := UDINT_TO_STRING(pAlarm^.nEventID);
+		_event_activity.uuid := GUID_TO_STRING(event_entry.uuidEventClass);
+		_event_activity.severity := pAlarm^.eSeverity;
+		_event_activity.text := event_text;
+		_event_activity.status := pAlarm^.bActive;
+		_queue_controller^.data_def_structure_name := 'EventActivityFields';
+		_queue_controller^.db_table_name := 'EventLogger';
+		//fbGetCurTaskIdx();
+		//_queue_controller^.cycle_time := _TaskInfo[fbGetCurTaskIdx.index].CycleTime;
+		_queue_controller^.minimum_chunk_size := 1;
+		_queue_controller^.maximum_chunk_size := 1;
+		_queue_controller^.buffer_size := AlarmEventParam.EVENT_LOG_BUFFER_SIZE;
+		_queue_controller^.write(input_data := F_BIGTYPE(ADR(_event_activity),SIZEOF(_event_activity)));
+		_step := 0;
+END_CASE
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="FB_init" Id="{8c8181f4-4dd5-46e2-b5cf-1479d2bbfe7c}">
+      <Declaration><![CDATA[METHOD FB_init : BOOL
+VAR_INPUT
+	bInitRetains : BOOL; // if TRUE, the retain variables are initialized (warm start / cold start)
+	bInCopyCode : BOOL;  // if TRUE, the instance afterwards gets moved into the copy code (online change)
+	queue_controller : POINTER TO BufferedRecord;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[_queue_controller := queue_controller;]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="lang_code" Id="{c9a801d5-eab9-4d79-9a65-bfd0882c8209}">
+      <Declaration><![CDATA[(*Should be 1033 as default because influxdb has not supported WSTRING*)
+PROPERTY lang_code : DINT]]></Declaration>
+      <Get Name="Get" Id="{9796221f-b69b-4734-9820-e9a4c183151a}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[lang_code := _lang_code;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{3fb4c966-a233-45ec-927e-f9d877a258da}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[_lang_code := lang_code;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="machine_name" Id="{d3553891-39ff-4c04-889d-3055cd1da17e}">
+      <Declaration><![CDATA[PROPERTY machine_name : STRING]]></Declaration>
+      <Get Name="Get" Id="{0e259d43-16df-4f85-b215-ab14b997d295}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[machine_name := _machine_name;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{4756dd8a-6149-48dd-853d-999b60452861}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[_machine_name := machine_name;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Method Name="q_get" Id="{ead27442-5109-4933-90b6-b35c73399345}">
+      <Declaration><![CDATA[METHOD q_get : POINTER TO FB_Alarm
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Set buffer index
+
+IF _queue_usage > 0 THEN
+	q_get := queue_buffer[nReadIndex];
+	_queue_usage := _queue_usage - 1;
+	nReadIndex := nReadIndex + 1;
+	IF nReadIndex > _queue_size - 1 THEN
+		nReadIndex := 0;
+	END_IF
+END_IF
+
+RETURN;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="q_put" Id="{121b2ed6-af5d-4252-960f-ca7327b29aaf}">
+      <Declaration><![CDATA[METHOD q_put : BOOL
+VAR_INPUT
+	lData : POINTER TO FB_Alarm;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Set buffer index
+
+IF _queue_usage >= _queue_size - 1 THEN
+	q_put := FALSE;
+ELSE
+	queue_buffer[nWriteIndex] := lData;
+	_queue_usage := _queue_usage + 1;
+	nWriteIndex := nWriteIndex + 1;
+	IF nWriteIndex > _queue_size - 1 THEN
+		nWriteIndex := 0;
+	END_IF
+	q_put := TRUE;
+END_IF
+
+RETURN;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="send_signal" Id="{9f165d7c-7f3a-47dc-b9d3-376769c753b7}">
+      <Declaration><![CDATA[{warning 'add method implementation '}
+METHOD send_signal : BOOL
+VAR_INPUT
+	pAlarm		: POINTER TO FB_Alarm;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+q_put(lData := pAlarm);
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_AlarmDBExporter">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_AlarmDBExporter.execute">
+      <LineId Id="5" Count="32" />
+      <LineId Id="4" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_AlarmDBExporter.FB_init">
+      <LineId Id="7" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_AlarmDBExporter.lang_code.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_AlarmDBExporter.lang_code.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_AlarmDBExporter.machine_name.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_AlarmDBExporter.machine_name.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_AlarmDBExporter.q_get">
+      <LineId Id="6" Count="3" />
+      <LineId Id="11" Count="6" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_AlarmDBExporter.q_put">
+      <LineId Id="6" Count="5" />
+      <LineId Id="13" Count="7" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_AlarmDBExporter.send_signal">
+      <LineId Id="68" Count="0" />
+      <LineId Id="89" Count="0" />
+      <LineId Id="11" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
