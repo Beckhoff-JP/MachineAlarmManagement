@@ -5,8 +5,10 @@
 VAR
 	_lang_code :DINT := 1033;
 	// For alarm IoT report
-	_queue_controller : POINTER TO BufferedRecord;
-	_machine_name	: STRING := 'Machine-1';
+	data_buffer		: ARRAY [0..AlarmEventParam.EVENT_LOG_BUFFER_SIZE - 1] OF EventActivityFields;
+	_recorder		: IRecordDB;
+	queue_controller	: tf6420.BufferedRecord(buffer_pointer := ADR(data_buffer), recorder := _recorder);		// record controller
+	_machine_name	: STRING := 'Not defined';
 	// for queue
 	_queue_usage	: UDINT;
 	_queue_size		: UDINT := AlarmEventParam.EVENT_LOG_BUFFER_SIZE;
@@ -43,6 +45,7 @@ CASE _step OF
 			_step := 20;
 		END_IF
 	20:
+		queue_controller.recorder := _recorder;
 		event_entry := pAlarm^.stEventEntry;
 		_event_activity.machine_id := _machine_name;
 		_event_activity.module_name := pAlarm^.module_name;
@@ -51,14 +54,14 @@ CASE _step OF
 		_event_activity.severity := pAlarm^.eSeverity;
 		_event_activity.text := event_text;
 		_event_activity.status := pAlarm^.bActive;
-		_queue_controller^.data_def_structure_name := 'EventActivityFields';
-		_queue_controller^.db_table_name := 'EventLogger';
+		queue_controller.data_def_structure_name := 'EventActivityFields';
+		queue_controller.db_table_name := 'EventLogger';
 		//fbGetCurTaskIdx();
-		//_queue_controller^.cycle_time := _TaskInfo[fbGetCurTaskIdx.index].CycleTime;
-		_queue_controller^.minimum_chunk_size := 1;
-		_queue_controller^.maximum_chunk_size := 1;
-		_queue_controller^.buffer_size := AlarmEventParam.EVENT_LOG_BUFFER_SIZE;
-		_queue_controller^.write(input_data := F_BIGTYPE(ADR(_event_activity),SIZEOF(_event_activity)));
+		//queue_controller.cycle_time := _TaskInfo[fbGetCurTaskIdx.index].CycleTime;
+		queue_controller.minimum_chunk_size := 1;
+		queue_controller.maximum_chunk_size := 1;
+		queue_controller.buffer_size := AlarmEventParam.EVENT_LOG_BUFFER_SIZE;
+		queue_controller.write(input_data := F_BIGTYPE(ADR(_event_activity),SIZEOF(_event_activity)));
 		_step := 0;
 END_CASE
 
@@ -70,10 +73,12 @@ END_CASE
 VAR_INPUT
 	bInitRetains : BOOL; // if TRUE, the retain variables are initialized (warm start / cold start)
 	bInCopyCode : BOOL;  // if TRUE, the instance afterwards gets moved into the copy code (online change)
-	queue_controller : POINTER TO BufferedRecord;
+	//queue_controller : POINTER TO BufferedRecord;
+	recorder	:	IRecordDB;
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[_queue_controller := queue_controller;]]></ST>
+        <ST><![CDATA[//_queue_controller := queue_controller;
+_recorder := recorder;]]></ST>
       </Implementation>
     </Method>
     <Property Name="lang_code" Id="{c9a801d5-eab9-4d79-9a65-bfd0882c8209}">
@@ -176,11 +181,14 @@ q_put(lData := pAlarm);
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_AlarmDBExporter.execute">
-      <LineId Id="5" Count="32" />
+      <LineId Id="5" Count="13" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="19" Count="18" />
       <LineId Id="4" Count="0" />
     </LineIds>
     <LineIds Name="FB_AlarmDBExporter.FB_init">
       <LineId Id="7" Count="0" />
+      <LineId Id="14" Count="0" />
     </LineIds>
     <LineIds Name="FB_AlarmDBExporter.lang_code.Get">
       <LineId Id="2" Count="0" />
