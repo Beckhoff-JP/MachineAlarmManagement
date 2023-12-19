@@ -51,6 +51,34 @@
 				<Hide GUID="{6C75FC62-EAF9-4E0D-89FF-B511EB85C1A9}"/>
 			</Hides>
 		</DataType>
+		<DataType>
+			<Name GUID="{6C75FC62-EAF9-4E0D-89FF-B511EB85C1A9}" PersistentType="true">UserEventClass</Name>
+			<DisplayName TxtId=""><![CDATA[MachineAlarmEvents]]></DisplayName>
+			<EventId>
+				<Name Id="1">test_alarm1</Name>
+				<DisplayName TxtId=""><![CDATA[Test Alarm 1 ( Critical )]]></DisplayName>
+				<Severity>Critical</Severity>
+			</EventId>
+			<EventId>
+				<Name Id="2">test_alarm2</Name>
+				<DisplayName TxtId=""><![CDATA[Test Alarm 2 ( Warning ) Alarm Code {0} , {1}]]></DisplayName>
+				<Severity>Warning</Severity>
+			</EventId>
+			<Translations>
+				<Text TxtId="Test Alarm 2 ( Warning ) Alarm Code {0} , {1}">
+					<Text LcId="1041"><![CDATA[テストアラーム 2 ( 警告 ) エラーコード {0} , {1}]]></Text>
+				</Text>
+			</Translations>
+			<Hides>
+				<Hide GUID="{9D6347FF-6E5A-4BC3-9F90-71DC87CB3F5A}"/>
+				<Hide GUID="{7A621EB6-7873-412E-8A4F-89AC56D765A5}"/>
+				<Hide GUID="{27881BD8-11C7-4A8F-AC4A-83D6412FE9DB}"/>
+				<Hide GUID="{59A40632-AA38-4B7D-B769-5FA97DD586AF}"/>
+				<Hide GUID="{33AF1980-438C-424C-A26C-E8F6DE65F3E5}"/>
+				<Hide GUID="{144700B8-1208-41A3-9C67-C5A275EA2F09}"/>
+				<Hide GUID="{32AD68B2-563E-4133-B066-809D11F76EC5}"/>
+			</Hides>
+		</DataType>
 	</DataTypes>
 	<Project ProjectGUID="{8E95978D-1F34-4A29-9ADC-6F2EBF2E2930}" Target64Bit="true" ShowHideConfigurations="#x6">
 		<System>
@@ -67,7 +95,7 @@
 		</System>
 		<Plc>
 			<Project GUID="{2E705217-A9B8-44ED-BB1E-60D6ED1D9BA4}" Name="MachineAlarmManager" PrjFilePath="MachineAlarmManager\MachineAlarmManager.plcproj" TmcFilePath="MachineAlarmManager\MachineAlarmManager.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="MachineAlarmManager\MachineAlarmManager.tmc" TmcHash="{69709FF2-8A1A-0395-CCEB-C74906CE460F}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="MachineAlarmManager\MachineAlarmManager.tmc" TmcHash="{5AADC65E-460C-94D9-1A94-A92C2170C4AB}">
 					<Name>MachineAlarmManager Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Contexts>

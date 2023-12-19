@@ -14,11 +14,7 @@ VAR
 	(* For IoT *)
 	// Cycle record data
 	fbInfluxDBRecorder	:RecordInfluxDB(DBID := GVL.TARGET_DBID);
-	// For database export from event logger
-	data_buffer		: ARRAY [0..AlarmEventParam.EVENT_LOG_BUFFER_SIZE - 1] OF EventActivityFields;
-	queue_controller	: BufferedRecord(ADR(data_buffer), fbInfluxDBRecorder);		// record controller
-	alarm_db_exporter		: FB_AlarmDBExporter(ADR(queue_controller));
-	
+	alarm_db_exporter		: FB_AlarmDBExporter(fbInfluxDBRecorder);
 
 	(*User variables*)
 	// User alarm event
@@ -35,7 +31,7 @@ END_VAR
 fbInfluxDBRecorder();
 
 // Initialize alarm event calculatror and IoT service
-alarm_db_exporter.machine_name := 'Roll Dice demo';
+alarm_db_exporter.machine_name := 'Machine-1';
 alarm_calculator.exporter := alarm_db_exporter;
 
 fbTestAlarm1(
