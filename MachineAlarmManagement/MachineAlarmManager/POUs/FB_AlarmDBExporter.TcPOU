@@ -7,7 +7,7 @@ VAR
 	// For alarm IoT report
 	data_buffer		: ARRAY [0..AlarmEventParam.EVENT_LOG_BUFFER_SIZE - 1] OF EventActivityFields;
 	_recorder		: IRecordDB;
-	queue_controller	: tf6420.BufferedRecord(buffer_pointer := ADR(data_buffer), recorder := _recorder);		// record controller
+	queue_controller	: BufferedRecord(buffer_pointer := ADR(data_buffer), recorder := _recorder);		// record controller
 	_machine_name	: STRING := 'Not defined';
 	// for queue
 	_queue_usage	: UDINT;
@@ -54,12 +54,12 @@ CASE _step OF
 		_event_activity.severity := pAlarm^.eSeverity;
 		_event_activity.text := event_text;
 		_event_activity.status := pAlarm^.bActive;
-		queue_controller.data_def_structure_name := 'EventActivityFields';
+		queue_controller.data_def_structure_name := 'bajp_alarm_manager.EventActivityFields';
 		queue_controller.db_table_name := 'EventLogger';
 		//fbGetCurTaskIdx();
 		//queue_controller.cycle_time := _TaskInfo[fbGetCurTaskIdx.index].CycleTime;
 		queue_controller.minimum_chunk_size := 1;
-		queue_controller.maximum_chunk_size := 1;
+		queue_controller.maximum_chunk_size := 2;
 		queue_controller.buffer_size := AlarmEventParam.EVENT_LOG_BUFFER_SIZE;
 		queue_controller.write(input_data := F_BIGTYPE(ADR(_event_activity),SIZEOF(_event_activity)));
 		_step := 0;

@@ -18,7 +18,7 @@
     <LibraryReferences>{cd21dfe6-3c37-4f0c-8575-289ac4e7ef61}</LibraryReferences>
     <Company>Beckhoff Automation K.K.</Company>
     <Released>false</Released>
-    <Title>Machine Alarm Event Manager</Title>
+    <Title>machine_alarm_manager</Title>
     <ProjectVersion>1.0.0.0</ProjectVersion>
     <LibraryCategories>
       <LibraryCategory>
@@ -70,8 +70,9 @@
     <SelectedLibraryCategories>
       <Id>{ebb42e0a-ab3e-4c49-880e-9e854060901d}</Id>
     </SelectedLibraryCategories>
-    <DefaultNamespace>bajp</DefaultNamespace>
+    <DefaultNamespace>bajp_alarm_manager</DefaultNamespace>
     <Author>Takashi Ichihashi</Author>
+    <DocFormat>reStructuredText</DocFormat>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="DUTs\DataTag.TcDUT">
