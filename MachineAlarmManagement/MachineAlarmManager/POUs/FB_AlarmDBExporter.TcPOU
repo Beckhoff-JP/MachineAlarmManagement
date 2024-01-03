@@ -9,12 +9,6 @@ VAR
 	_recorder		: IRecordDB;
 	queue_controller	: BufferedRecord(buffer_pointer := ADR(data_buffer), recorder := _recorder);		// record controller
 	_machine_name	: STRING := 'Not defined';
-	// for queue
-	_queue_usage	: UDINT;
-	_queue_size		: UDINT := AlarmEventParam.EVENT_LOG_BUFFER_SIZE;
-	nWriteIndex		: UDINT;
-	nReadIndex		: UDINT;
-	queue_buffer	: ARRAY [0..AlarmEventParam.EVENT_LOG_BUFFER_SIZE - 1] OF POINTER TO FB_Alarm;
 	{attribute 'TcEncoding' := 'UTF-8'}
 	event_text		: STRING;
 	event_entry		: TcEventEntry;	
@@ -26,48 +20,6 @@ END_VAR
     <Implementation>
       <ST><![CDATA[]]></ST>
     </Implementation>
-    <Method Name="execute" Id="{cd818fec-1129-4af5-86eb-7822aa752bc0}">
-      <Declaration><![CDATA[{warning 'add method implementation '}
-METHOD execute : BOOL
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[
-CASE _step OF
-	0 :
-		IF _queue_usage > 0 THEN
-			pAlarm := q_get();
-			_step := 10;
-		END_IF
-	10:
-		IF pAlarm^.RequestEventText(
-				nLangID := _lang_code, sResult := event_text, nResultSize := SIZEOF(event_text)
-		) THEN
-			_step := 20;
-		END_IF
-	20:
-		queue_controller.recorder := _recorder;
-		event_entry := pAlarm^.stEventEntry;
-		_event_activity.machine_id := _machine_name;
-		_event_activity.module_name := pAlarm^.module_name;
-		_event_activity.event_id := UDINT_TO_STRING(pAlarm^.nEventID);
-		_event_activity.uuid := GUID_TO_STRING(event_entry.uuidEventClass);
-		_event_activity.severity := pAlarm^.eSeverity;
-		_event_activity.text := event_text;
-		_event_activity.status := pAlarm^.bActive;
-		queue_controller.data_def_structure_name := 'bajp_alarm_manager.EventActivityFields';
-		queue_controller.db_table_name := 'EventLogger';
-		//fbGetCurTaskIdx();
-		//queue_controller.cycle_time := _TaskInfo[fbGetCurTaskIdx.index].CycleTime;
-		queue_controller.minimum_chunk_size := 1;
-		queue_controller.maximum_chunk_size := 2;
-		queue_controller.buffer_size := AlarmEventParam.EVENT_LOG_BUFFER_SIZE;
-		queue_controller.write(input_data := F_BIGTYPE(ADR(_event_activity),SIZEOF(_event_activity)));
-		_step := 0;
-END_CASE
-
-]]></ST>
-      </Implementation>
-    </Method>
     <Method Name="FB_init" Id="{8c8181f4-4dd5-46e2-b5cf-1479d2bbfe7c}">
       <Declaration><![CDATA[METHOD FB_init : BOOL
 VAR_INPUT
@@ -120,50 +72,6 @@ END_VAR
         </Implementation>
       </Set>
     </Property>
-    <Method Name="q_get" Id="{ead27442-5109-4933-90b6-b35c73399345}">
-      <Declaration><![CDATA[METHOD q_get : POINTER TO FB_Alarm
-VAR_INPUT
-END_VAR
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[//Set buffer index
-
-IF _queue_usage > 0 THEN
-	q_get := queue_buffer[nReadIndex];
-	_queue_usage := _queue_usage - 1;
-	nReadIndex := nReadIndex + 1;
-	IF nReadIndex > _queue_size - 1 THEN
-		nReadIndex := 0;
-	END_IF
-END_IF
-
-RETURN;]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="q_put" Id="{121b2ed6-af5d-4252-960f-ca7327b29aaf}">
-      <Declaration><![CDATA[METHOD q_put : BOOL
-VAR_INPUT
-	lData : POINTER TO FB_Alarm;
-END_VAR
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[//Set buffer index
-
-IF _queue_usage >= _queue_size - 1 THEN
-	q_put := FALSE;
-ELSE
-	queue_buffer[nWriteIndex] := lData;
-	_queue_usage := _queue_usage + 1;
-	nWriteIndex := nWriteIndex + 1;
-	IF nWriteIndex > _queue_size - 1 THEN
-		nWriteIndex := 0;
-	END_IF
-	q_put := TRUE;
-END_IF
-
-RETURN;]]></ST>
-      </Implementation>
-    </Method>
     <Method Name="send_signal" Id="{9f165d7c-7f3a-47dc-b9d3-376769c753b7}">
       <Declaration><![CDATA[{warning 'add method implementation '}
 METHOD send_signal : BOOL
@@ -172,19 +80,28 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[
+        <ST><![CDATA[queue_controller.recorder := _recorder;
+event_entry := pAlarm^.stEventEntry;
+_event_activity.machine_id := _machine_name;
+_event_activity.module_name := pAlarm^.module_name;
+_event_activity.event_id := UDINT_TO_STRING(pAlarm^.nEventID);
+_event_activity.uuid := GUID_TO_STRING(event_entry.uuidEventClass);
+_event_activity.severity := pAlarm^.eSeverity;
+_event_activity.text := pAlarm^.alarm_text;
+_event_activity.status := pAlarm^.bActive;
+queue_controller.data_def_structure_name := 'bajp_alarm_manager.EventActivityFields';
+queue_controller.db_table_name := 'EventLogger';
+queue_controller.minimum_chunk_size := 1;
+queue_controller.maximum_chunk_size := 1;
+queue_controller.buffer_size := AlarmEventParam.EVENT_LOG_BUFFER_SIZE;
+queue_controller.write(input_data := F_BIGTYPE(ADR(_event_activity),SIZEOF(_event_activity)));
+(*
 q_put(lData := pAlarm);
-]]></ST>
+*)]]></ST>
       </Implementation>
     </Method>
     <LineIds Name="FB_AlarmDBExporter">
       <LineId Id="9" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_AlarmDBExporter.execute">
-      <LineId Id="5" Count="13" />
-      <LineId Id="40" Count="0" />
-      <LineId Id="19" Count="18" />
-      <LineId Id="4" Count="0" />
     </LineIds>
     <LineIds Name="FB_AlarmDBExporter.FB_init">
       <LineId Id="7" Count="0" />
@@ -202,17 +119,8 @@ q_put(lData := pAlarm);
     <LineIds Name="FB_AlarmDBExporter.machine_name.Set">
       <LineId Id="2" Count="0" />
     </LineIds>
-    <LineIds Name="FB_AlarmDBExporter.q_get">
-      <LineId Id="6" Count="3" />
-      <LineId Id="11" Count="6" />
-      <LineId Id="5" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_AlarmDBExporter.q_put">
-      <LineId Id="6" Count="5" />
-      <LineId Id="13" Count="7" />
-      <LineId Id="5" Count="0" />
-    </LineIds>
     <LineIds Name="FB_AlarmDBExporter.send_signal">
+      <LineId Id="95" Count="14" />
       <LineId Id="68" Count="0" />
       <LineId Id="89" Count="0" />
       <LineId Id="11" Count="0" />

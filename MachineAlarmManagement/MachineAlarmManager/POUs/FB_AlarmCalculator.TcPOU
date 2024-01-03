@@ -3,7 +3,7 @@
   <POU Name="FB_AlarmCalculator" Id="{f9fb4732-2a58-4724-8e9e-37487e3bcd05}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_AlarmCalculator
 VAR CONSTANT
-	NUM_OF_SEVERITIES: UINT  := 6;
+	NUM_OF_SEVERITIES: UINT  := 5;
 END_VAR
 VAR_INPUT
 	bRefresh	: BOOL;			// make true at momentally (1 cycle) when 
@@ -16,11 +16,9 @@ VAR
 	_exporter	: I_EventExporter;
 	//_p_exporter	: POINTER TO FB_AlarmDBExporter;
 	lang_code	: DINT := 1033;
-	{attribute 'TcEncoding':='UTF-8'}
-	event_text	: STRING;
 	event_severities	: ARRAY [0..NUM_OF_SEVERITIES - 1] OF EventSeverityStatusMember := [
-		(severity := TcEventSeverity.Critical),(severity := TcEventSeverity.Error),(severity := TcEventSeverity.Info),
-		(severity := TcEventSeverity.Verbose),(severity := TcEventSeverity.Warning),(severity := TcEventSeverity.Warning)
+		(severity := TcEventSeverity.Verbose),(severity := TcEventSeverity.Info),(severity := TcEventSeverity.Warning),
+		(severity := TcEventSeverity.Error),(severity := TcEventSeverity.Critical)
 	];
 	i			: UINT;
 	j			: UINT;
@@ -30,11 +28,7 @@ VAR
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[IF _exporter <> 0 THEN
-	_exporter.execute();
-END_IF
-
-FOR i := 0 TO al_index - 1 DO
+      <ST><![CDATA[FOR i := 0 TO al_index - 1 DO
 	// clear
 	IF bRefresh AND NOT bMemRefresh THEN
 		FOR j := 0 TO NUM_OF_SEVERITIES - 1 DO
@@ -133,7 +127,7 @@ VAR
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[is_unconfirmed := FALSE;
-FOR j := 0 TO NUM_OF_SEVERITIES - 1 DO
+FOR i := 0 TO NUM_OF_SEVERITIES - 1 DO
 	IF event_severities[i].raised AND NOT event_severities[i].confirmed AND event_severities[i].severity >= severity THEN
 		is_unconfirmed := TRUE;
 		RETURN;
@@ -142,6 +136,17 @@ END_FOR
 ]]></ST>
       </Implementation>
     </Method>
+    <Property Name="p_alarm_list" Id="{90b2eb37-4f2f-48cd-82d9-aa401f30f999}">
+      <Declaration><![CDATA[PROPERTY p_alarm_list : PVOID]]></Declaration>
+      <Get Name="Get" Id="{8820ab56-5de6-4761-96ff-2c635d634b8c}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[p_alarm_list := ADR(p_alarms);]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
     <Method Name="reg_alarm" Id="{9282b111-287e-4a69-a8d7-7357a254d643}">
       <Declaration><![CDATA[METHOD INTERNAL reg_alarm : BOOL
 VAR_INPUT
@@ -160,9 +165,6 @@ reg_alarm := TRUE;]]></ST>
       </Implementation>
     </Method>
     <LineIds Name="FB_AlarmCalculator">
-      <LineId Id="427" Count="1" />
-      <LineId Id="430" Count="0" />
-      <LineId Id="426" Count="0" />
       <LineId Id="267" Count="0" />
       <LineId Id="382" Count="1" />
       <LineId Id="386" Count="1" />
@@ -190,6 +192,9 @@ reg_alarm := TRUE;]]></ST>
     <LineIds Name="FB_AlarmCalculator.is_unconfirmed">
       <LineId Id="47" Count="6" />
       <LineId Id="24" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_AlarmCalculator.p_alarm_list.Get">
+      <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_AlarmCalculator.reg_alarm">
       <LineId Id="30" Count="0" />

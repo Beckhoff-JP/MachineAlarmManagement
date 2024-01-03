@@ -17,9 +17,9 @@
     <Implicit_Jitter_Distribution>{5404cbde-6530-4524-8b11-9cd8b05889a9}</Implicit_Jitter_Distribution>
     <LibraryReferences>{cd21dfe6-3c37-4f0c-8575-289ac4e7ef61}</LibraryReferences>
     <Company>Beckhoff Automation K.K.</Company>
-    <Released>false</Released>
+    <Released>true</Released>
     <Title>machine_alarm_manager</Title>
-    <ProjectVersion>1.0.0.0</ProjectVersion>
+    <ProjectVersion>1.0.0.1</ProjectVersion>
     <LibraryCategories>
       <LibraryCategory>
         <Id>{f484dac6-21b6-4d52-a832-fa3cc2ceea83}</Id>
