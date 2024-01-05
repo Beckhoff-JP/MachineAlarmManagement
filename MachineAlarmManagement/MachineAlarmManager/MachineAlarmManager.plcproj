@@ -19,7 +19,7 @@
     <Company>Beckhoff Automation K.K.</Company>
     <Released>true</Released>
     <Title>machine_alarm_manager</Title>
-    <ProjectVersion>1.0.0.1</ProjectVersion>
+    <ProjectVersion>1.0.1.1</ProjectVersion>
     <LibraryCategories>
       <LibraryCategory>
         <Id>{f484dac6-21b6-4d52-a832-fa3cc2ceea83}</Id>

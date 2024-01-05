@@ -4,8 +4,9 @@
     <Declaration><![CDATA[TYPE EventSeverityStatusMember :
 STRUCT
 	severity 	: TcEventSeverity;
-	raised		: BOOL;
-	confirmed	: BOOL;
+	active_counter		: UINT;
+	raised_counter		: UINT;
+	confirmed_counter	: UINT;
 END_STRUCT
 END_TYPE
 ]]></Declaration>

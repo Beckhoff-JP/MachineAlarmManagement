@@ -8,10 +8,10 @@ VAR_INPUT
 	bConfirm	: BOOL;				// True momentally after operator confirming event.
 	bLatch		: BOOL := FALSE;	// Keep alarm status raised after bEvt being FALSE.
 	bReset		: BOOL := FALSE;	// When the bLatch flag is True and bEvt is False, this flag can be unlatch when raised. 
-	language_id		:DINT := 1033;	// Language ID for alarm text
 END_VAR
 VAR_OUTPUT
 	event_raised	:BOOL;			// Set true during alarm event is activated
+	event_reset		:BOOL;			// Set true at 1 cycle when event factor disappeared.
 	event_cleared	:BOOL;			// Set true at 1 cycle when event would be deactivated.
 	event_confirmed	:BOOL;			// Set true at 1 cycle when event would be confirmed.
 END_VAR
@@ -23,23 +23,15 @@ VAR
 	bMemActive: BOOL;
 	{attribute 'TcEncoding' := 'UTF-8'}
 	_alarm_text : STRING;
-	pLangId	: DINT;
 	_last_raise_time : ULINT;
 	_last_reset_time : ULINT;
+	_refresh_alarm_text: BOOL;
 END_VAR
-]]></Declaration>
+VAR PERSISTENT
+	_sequence_number	: ULINT;	
+END_VAR]]></Declaration>
     <Implementation>
-      <ST><![CDATA[IF pLangId <> language_id THEN
-	_alarm_text := '';
-END_IF
-
-IF _alarm_text = '' THEN
-	get_alarm_text(language_id);
-END_IF
-
-pLangId := language_id;
-
-IF bEvt 
+      <ST><![CDATA[IF bEvt 
 	AND NOT bMemEvt 
 	AND SUPER^.eConfirmationState <> TcEventConfirmationState.WaitForConfirmation THEN
 	event_raised := TRUE;
@@ -48,10 +40,14 @@ ELSE
 	event_raised := FALSE;
 END_IF
 
+event_reset := NOT bEvt AND bMemEvt;
+
 IF event_raised THEN
 	_last_raise_time := F_GetSystemTime();
+	IF NOT bMemActive THEN
+		_sequence_number :=_sequence_number + 1;
+	END_IF
 END_IF
-
 
 IF bConfirm THEN
 	SUPER^.Confirm(0);
@@ -73,15 +69,18 @@ ELSE
 	END_IF
 END_IF
 
-bMemEvt := bEvt;
-bMemReset := bReset;
-bMemConfirmEvent := exist_wait_for_confirmation;
 event_cleared := NOT SUPER^.bActive AND bMemActive;
-bMemActive := SUPER^.bActive;
 
 IF event_cleared THEN
 	_last_reset_time := F_GetSystemTime();
 END_IF
+
+// Memory variables as a last cycle.
+
+bMemEvt := bEvt;
+bMemReset := bReset;
+bMemConfirmEvent := exist_wait_for_confirmation;
+bMemActive := SUPER^.bActive;
 ]]></ST>
     </Implementation>
     <Property Name="alarm_text" Id="{2d576994-e408-408b-b516-5d1698089ace}">
@@ -114,18 +113,17 @@ SUPER^.CreateEx(evtEntry, TRUE, 0);
     <Method Name="get_alarm_text" Id="{5abff93c-6a62-4cad-aefd-c22f58a80c9b}">
       <Declaration><![CDATA[METHOD get_alarm_text : BOOL
 VAR_INPUT
-	nLangId	:	DINT  := 1033;// Language code
+	nLangId	:	DINT  := 1031;// Language code
 END_VAR
-VAR
-	_text	:STRING;
-END_VAR
+
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[language_id := nLangId;
-IF get_alarm_text := THIS^.RequestEventText(nLangId := language_id, sResult := _text, nResultSize := SIZEOF(_text)) THEN
-	UTF8_TO_STRING(ADR(_alarm_text), ADR(_text), SIZEOF(_text));
+        <ST><![CDATA[get_alarm_text := RequestEventText(nLangId := nLangId, sResult := _alarm_text, nResultSize := SIZEOF(_alarm_text));
+(*
+IF get_alarm_text := RequestEventText(nLangId := language_id, sResult := _alarm_text, nResultSize := SIZEOF(_alarm_text)) THEN
+	UTF8_TO_STRING(ADR(_alarm_text), ADR(_alarm_text), SIZEOF(_alarm_text));
 END_IF
-]]></ST>
+*)]]></ST>
       </Implementation>
     </Method>
     <Property Name="last_raise_time" Id="{c92c6216-dcb6-4222-8b82-f4b628a09b1e}">
@@ -152,10 +150,28 @@ END_VAR
         </Implementation>
       </Get>
     </Property>
+    <Property Name="sequence_number" Id="{2d2faeb8-c700-47a3-baa9-26f155d2b8ea}">
+      <Declaration><![CDATA[PROPERTY sequence_number : ULINT]]></Declaration>
+      <Get Name="Get" Id="{f1ae68f4-2371-4cd4-83bd-eb8d42610b37}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[sequence_number := _sequence_number;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
     <LineIds Name="FB_Alarm">
-      <LineId Id="419" Count="46" />
-      <LineId Id="467" Count="0" />
-      <LineId Id="469" Count="4" />
+      <LineId Id="617" Count="11" />
+      <LineId Id="685" Count="0" />
+      <LineId Id="689" Count="0" />
+      <LineId Id="692" Count="0" />
+      <LineId Id="691" Count="0" />
+      <LineId Id="631" Count="0" />
+      <LineId Id="633" Count="25" />
+      <LineId Id="677" Count="1" />
+      <LineId Id="670" Count="0" />
+      <LineId Id="672" Count="3" />
       <LineId Id="366" Count="0" />
     </LineIds>
     <LineIds Name="FB_Alarm.alarm_text.Get">
@@ -167,7 +183,7 @@ END_VAR
       <LineId Id="10" Count="0" />
     </LineIds>
     <LineIds Name="FB_Alarm.get_alarm_text">
-      <LineId Id="10" Count="0" />
+      <LineId Id="29" Count="1" />
       <LineId Id="12" Count="0" />
       <LineId Id="20" Count="1" />
       <LineId Id="9" Count="0" />
@@ -179,6 +195,9 @@ END_VAR
     <LineIds Name="FB_Alarm.last_reset_time.Get">
       <LineId Id="2" Count="0" />
       <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Alarm.sequence_number.Get">
+      <LineId Id="2" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>
