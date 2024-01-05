@@ -33,26 +33,6 @@ END_VAR]]></Declaration>
 _recorder := recorder;]]></ST>
       </Implementation>
     </Method>
-    <Property Name="lang_code" Id="{c9a801d5-eab9-4d79-9a65-bfd0882c8209}">
-      <Declaration><![CDATA[(*Should be 1033 as default because influxdb has not supported WSTRING*)
-PROPERTY lang_code : DINT]]></Declaration>
-      <Get Name="Get" Id="{9796221f-b69b-4734-9820-e9a4c183151a}">
-        <Declaration><![CDATA[VAR
-END_VAR
-]]></Declaration>
-        <Implementation>
-          <ST><![CDATA[lang_code := _lang_code;]]></ST>
-        </Implementation>
-      </Get>
-      <Set Name="Set" Id="{3fb4c966-a233-45ec-927e-f9d877a258da}">
-        <Declaration><![CDATA[VAR
-END_VAR
-]]></Declaration>
-        <Implementation>
-          <ST><![CDATA[_lang_code := lang_code;]]></ST>
-        </Implementation>
-      </Set>
-    </Property>
     <Property Name="machine_name" Id="{d3553891-39ff-4c04-889d-3055cd1da17e}">
       <Declaration><![CDATA[PROPERTY machine_name : STRING]]></Declaration>
       <Get Name="Get" Id="{0e259d43-16df-4f85-b215-ab14b997d295}">
@@ -92,7 +72,7 @@ _event_activity.status := pAlarm^.bActive;
 queue_controller.data_def_structure_name := 'bajp_alarm_manager.EventActivityFields';
 queue_controller.db_table_name := 'EventLogger';
 queue_controller.minimum_chunk_size := 1;
-queue_controller.maximum_chunk_size := 1;
+queue_controller.maximum_chunk_size := 2;
 queue_controller.buffer_size := AlarmEventParam.EVENT_LOG_BUFFER_SIZE;
 queue_controller.write(input_data := F_BIGTYPE(ADR(_event_activity),SIZEOF(_event_activity)));
 (*
@@ -106,12 +86,6 @@ q_put(lData := pAlarm);
     <LineIds Name="FB_AlarmDBExporter.FB_init">
       <LineId Id="7" Count="0" />
       <LineId Id="14" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_AlarmDBExporter.lang_code.Get">
-      <LineId Id="2" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_AlarmDBExporter.lang_code.Set">
-      <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_AlarmDBExporter.machine_name.Get">
       <LineId Id="2" Count="0" />

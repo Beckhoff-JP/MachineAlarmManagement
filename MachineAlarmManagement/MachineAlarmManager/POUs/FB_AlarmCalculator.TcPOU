@@ -4,6 +4,7 @@
     <Declaration><![CDATA[FUNCTION_BLOCK FB_AlarmCalculator
 VAR CONSTANT
 	NUM_OF_SEVERITIES: UINT  := 5;
+	COMMAND_QUEUE_BUFFER_SIZE :UINT := 20;
 END_VAR
 VAR_INPUT
 	bRefresh	: BOOL;			// make true at momentally (1 cycle) when 
@@ -15,66 +16,65 @@ VAR
 	p_alarms	: ARRAY [0..AlarmEventParam.ALARM_MAX_COUNT - 1] OF POINTER TO FB_Alarm;
 	_exporter	: I_EventExporter;
 	//_p_exporter	: POINTER TO FB_AlarmDBExporter;
-	lang_code	: DINT := 1033;
-	event_severities	: ARRAY [0..NUM_OF_SEVERITIES - 1] OF EventSeverityStatusMember := [
+	state_counter	: ARRAY [0..NUM_OF_SEVERITIES - 1] OF EventSeverityStatusMember := [
 		(severity := TcEventSeverity.Verbose),(severity := TcEventSeverity.Info),(severity := TcEventSeverity.Warning),
 		(severity := TcEventSeverity.Error),(severity := TcEventSeverity.Critical)
 	];
+	_counter 	:UINT;
 	i			: UINT;
 	j			: UINT;
+
 	
-	_test_counter:  UDINT;
-	bMemRefresh : BOOL;
+	// queue controll
+	
+	_queue_usage:	UDINT;
+	_queue_size:	UDINT := COMMAND_QUEUE_BUFFER_SIZE;
+	nWriteIndex: 	UDINT;
+	nReadIndex: 	UDINT;
+	queue_buffer:	ARRAY [0..COMMAND_QUEUE_BUFFER_SIZE - 1] OF PVOID;
+	event_text:		STRING;
+	pAlarm:			POINTER TO FB_Alarm;
+	_lang_code:		DINT := 1031; 
+	_step: UINT;
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[FOR i := 0 TO al_index - 1 DO
-	// clear
-	IF bRefresh AND NOT bMemRefresh THEN
-		FOR j := 0 TO NUM_OF_SEVERITIES - 1 DO
-			IF event_severities[j].severity = p_alarms[i]^.eSeverity THEN
-				event_severities[j].raised := p_alarms[i]^.bActive;
-				event_severities[j].confirmed := p_alarms[i]^.bActive AND p_alarms[i]^.eConfirmationState <> TcEventConfirmationState.WaitForConfirmation;
-			END_IF
-		END_FOR
-	END_IF
-	// raised status
-	IF p_alarms[i]^.event_raised THEN
-		FOR j := 0 TO NUM_OF_SEVERITIES - 1 DO
-			IF event_severities[j].severity = p_alarms[i]^.eSeverity THEN
-				event_severities[j].raised := TRUE;		
-			END_IF
-		END_FOR
-		// exporter
-		IF _exporter <> 0 THEN
-			_exporter.send_signal(p_alarms[i]);	
-		END_IF
-	END_IF
-	// confirmed status
-	IF p_alarms[i]^.event_confirmed THEN
-		FOR j := 0 TO NUM_OF_SEVERITIES - 1 DO
-			IF event_severities[j].severity = p_alarms[i]^.eSeverity THEN
-				event_severities[j].confirmed := TRUE;		
-			END_IF
-		END_FOR
-	END_IF
-
-	// clear status
-	IF p_alarms[i]^.event_cleared THEN
-		FOR j := 0 TO NUM_OF_SEVERITIES - 1 DO
-			IF event_severities[j].severity = p_alarms[i]^.eSeverity THEN
-				event_severities[j].raised := FALSE;
-				event_severities[j].confirmed := FALSE;
-			END_IF
-		END_FOR
-		// exporter
-		IF _exporter <> 0 THEN
-			_exporter.send_signal(p_alarms[i]);
-		END_IF
-	END_IF
-	
+      <ST><![CDATA[
+FOR j := 0 TO NUM_OF_SEVERITIES - 1 DO
+	state_counter[j].active_counter := 0;
+	state_counter[j].raised_counter := 0;
+	state_counter[j].confirmed_counter := 0;		
 END_FOR
-bMemRefresh := bRefresh;]]></ST>
+FOR i := 0 TO al_index - 1 DO
+	j := p_alarms[i]^.eSeverity;
+	IF p_alarms[i]^.bEvt THEN
+		state_counter[j].active_counter := state_counter[j].active_counter + 1;
+	END_IF
+	IF p_alarms[i]^.bActive THEN
+		state_counter[j].raised_counter := state_counter[j].raised_counter + 1;
+	END_IF
+	IF p_alarms[i]^.bActive AND p_alarms[i]^.eConfirmationState <> TcEventConfirmationState.WaitForConfirmation THEN
+		state_counter[j].confirmed_counter := state_counter[j].confirmed_counter + 1;
+	END_IF
+	IF p_alarms[i]^.event_raised OR p_alarms[i]^.event_cleared THEN
+		put(p_alarms[i]);
+	END_IF
+END_FOR
+
+CASE _step OF
+	0 :
+		IF _queue_usage > 0 THEN
+			pAlarm := get();
+			_step := 10;
+		END_IF
+	10:
+		IF _exporter <> 0 AND pAlarm <> 0 THEN
+			IF pAlarm^.get_alarm_text(_lang_code) THEN
+				_exporter.send_signal(pAlarm);
+				_step := 0;
+			END_IF
+		END_IF
+END_CASE]]></ST>
     </Implementation>
     <Property Name="exporter" Id="{8ed77c58-6df9-432f-95d3-8678854c6442}">
       <Declaration><![CDATA[PROPERTY exporter : I_EventExporter]]></Declaration>
@@ -96,6 +96,55 @@ END_VAR
         </Implementation>
       </Set>
     </Property>
+    <Property Name="full" Id="{e3de9c67-ef8c-4885-b0d0-c9c6d8211ff9}">
+      <Declaration><![CDATA[PROPERTY full : BOOL]]></Declaration>
+      <Get Name="Get" Id="{f87d1f5c-efdd-40b1-a1b7-dd2f20e9ba27}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[full :=  _queue_usage >= COMMAND_QUEUE_BUFFER_SIZE - 1;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="get" Id="{7d30b5e5-3cde-4ac8-bc75-313862a9fcfc}">
+      <Declaration><![CDATA[METHOD get : PVOID
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Set buffer index
+
+IF _queue_usage > 0 THEN
+	get := queue_buffer[nReadIndex];
+	_queue_usage := _queue_usage - 1;
+	nReadIndex := nReadIndex + 1;
+	IF nReadIndex > COMMAND_QUEUE_BUFFER_SIZE - 1 THEN
+		nReadIndex := 0;
+	END_IF
+END_IF
+
+RETURN;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="is_active" Id="{07aa9bb9-d63a-4e70-ac95-7d6d764146f1}">
+      <Declaration><![CDATA[METHOD is_active : BOOL
+VAR_INPUT
+	severity : TcEventSeverity := TcEventSeverity.Error; // Filterd minimum serverity level
+END_VAR
+VAR
+	i:	UINT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[is_active := FALSE;
+FOR i := severity TO NUM_OF_SEVERITIES - 1 DO
+	IF state_counter[i].active_counter > 0 THEN
+		is_active := TRUE;
+		RETURN;
+	END_IF
+END_FOR]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="is_raised" Id="{de96aac9-c9b2-4695-bd6f-841b669f2da8}">
       <Declaration><![CDATA[// TRUE if the registered events filtered by specified severity level is in Raised state.
 METHOD PUBLIC is_raised : BOOL
@@ -107,8 +156,8 @@ VAR
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[is_raised := FALSE;
-FOR i := 0 TO NUM_OF_SEVERITIES - 1 DO
-	IF event_severities[i].raised AND event_severities[i].severity >= severity THEN
+FOR i := severity TO NUM_OF_SEVERITIES - 1 DO
+	IF state_counter[i].raised_counter > 0  THEN
 		is_raised := TRUE;
 		RETURN;
 	END_IF
@@ -127,8 +176,8 @@ VAR
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[is_unconfirmed := FALSE;
-FOR i := 0 TO NUM_OF_SEVERITIES - 1 DO
-	IF event_severities[i].raised AND NOT event_severities[i].confirmed AND event_severities[i].severity >= severity THEN
+FOR i := severity TO NUM_OF_SEVERITIES - 1 DO
+	IF state_counter[i].raised_counter > state_counter[i].confirmed_counter THEN
 		is_unconfirmed := TRUE;
 		RETURN;
 	END_IF
@@ -136,6 +185,27 @@ END_FOR
 ]]></ST>
       </Implementation>
     </Method>
+    <Property Name="lang_code" Id="{d16b24d8-fc6b-4de5-9635-69e1c70a5846}">
+      <Declaration><![CDATA[{warning 'add property implementation'}
+PROPERTY lang_code : DINT
+]]></Declaration>
+      <Get Name="Get" Id="{b97d26d3-ff91-4b2a-9bf0-bbb8f21df6ee}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[lang_code := _lang_code;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{722ab80b-bb02-4b63-ae92-426a8a494104}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[_lang_code := lang_code;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
     <Property Name="p_alarm_list" Id="{90b2eb37-4f2f-48cd-82d9-aa401f30f999}">
       <Declaration><![CDATA[PROPERTY p_alarm_list : PVOID]]></Declaration>
       <Get Name="Get" Id="{8820ab56-5de6-4761-96ff-2c635d634b8c}">
@@ -147,6 +217,30 @@ END_VAR
         </Implementation>
       </Get>
     </Property>
+    <Method Name="put" Id="{93203208-f677-42c4-9276-d0f7d8d17596}">
+      <Declaration><![CDATA[METHOD put : BOOL
+VAR_INPUT
+	lData:	PVOID;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//Set buffer index
+
+IF _queue_usage >= COMMAND_QUEUE_BUFFER_SIZE - 1 THEN
+	put := 0;
+ELSE
+	queue_buffer[nWriteIndex] := lData;
+	_queue_usage := _queue_usage + 1;
+	nWriteIndex := nWriteIndex + 1;
+	IF nWriteIndex > COMMAND_QUEUE_BUFFER_SIZE - 1 THEN
+		nWriteIndex := 0;
+	END_IF
+	put := 1;
+END_IF
+
+RETURN;]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="reg_alarm" Id="{9282b111-287e-4a69-a8d7-7357a254d643}">
       <Declaration><![CDATA[METHOD INTERNAL reg_alarm : BOOL
 VAR_INPUT
@@ -165,25 +259,43 @@ reg_alarm := TRUE;]]></ST>
       </Implementation>
     </Method>
     <LineIds Name="FB_AlarmCalculator">
-      <LineId Id="267" Count="0" />
-      <LineId Id="382" Count="1" />
-      <LineId Id="386" Count="1" />
-      <LineId Id="391" Count="0" />
-      <LineId Id="388" Count="2" />
-      <LineId Id="385" Count="0" />
-      <LineId Id="268" Count="8" />
-      <LineId Id="354" Count="0" />
-      <LineId Id="286" Count="19" />
-      <LineId Id="323" Count="1" />
-      <LineId Id="316" Count="2" />
-      <LineId Id="9" Count="0" />
-      <LineId Id="393" Count="0" />
+      <LineId Id="593" Count="0" />
+      <LineId Id="693" Count="0" />
+      <LineId Id="696" Count="2" />
+      <LineId Id="695" Count="0" />
+      <LineId Id="685" Count="0" />
+      <LineId Id="703" Count="0" />
+      <LineId Id="610" Count="2" />
+      <LineId Id="616" Count="5" />
+      <LineId Id="705" Count="2" />
+      <LineId Id="596" Count="0" />
+      <LineId Id="474" Count="7" />
+      <LineId Id="504" Count="0" />
+      <LineId Id="510" Count="0" />
+      <LineId Id="506" Count="0" />
+      <LineId Id="509" Count="0" />
+      <LineId Id="511" Count="0" />
+      <LineId Id="507" Count="0" />
+      <LineId Id="473" Count="0" />
     </LineIds>
     <LineIds Name="FB_AlarmCalculator.exporter.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_AlarmCalculator.exporter.Set">
       <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_AlarmCalculator.full.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_AlarmCalculator.get">
+      <LineId Id="6" Count="4" />
+      <LineId Id="12" Count="3" />
+      <LineId Id="17" Count="1" />
+      <LineId Id="16" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_AlarmCalculator.is_active">
+      <LineId Id="11" Count="5" />
+      <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_AlarmCalculator.is_raised">
       <LineId Id="63" Count="6" />
@@ -193,8 +305,19 @@ reg_alarm := TRUE;]]></ST>
       <LineId Id="47" Count="6" />
       <LineId Id="24" Count="0" />
     </LineIds>
+    <LineIds Name="FB_AlarmCalculator.lang_code.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_AlarmCalculator.lang_code.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
     <LineIds Name="FB_AlarmCalculator.p_alarm_list.Get">
       <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_AlarmCalculator.put">
+      <LineId Id="6" Count="6" />
+      <LineId Id="14" Count="6" />
+      <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_AlarmCalculator.reg_alarm">
       <LineId Id="30" Count="0" />
