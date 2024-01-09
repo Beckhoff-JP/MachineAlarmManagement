@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="AlarmMessage" Id="{36b03e8b-581e-4833-8d4a-2aaf74512127}">
+    <Declaration><![CDATA[TYPE AlarmMessage EXTENDS EventActivityFields :
+STRUCT
+	datetime: ULINT;
+	sequence_number: ULINT;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

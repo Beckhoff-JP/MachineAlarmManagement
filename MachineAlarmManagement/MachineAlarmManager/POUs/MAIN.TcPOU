@@ -14,7 +14,8 @@ VAR
 	(* For IoT *)
 	// Cycle record data
 	fbInfluxDBRecorder	:RecordInfluxDB(DBID := GVL.TARGET_DBID);
-	alarm_db_exporter		: FB_AlarmDBExporter(fbInfluxDBRecorder);
+	alarm_db_listener		: FB_AlarmDBListener(fbInfluxDBRecorder);
+	simple_listener			: FB_AlarmSimpleListener;
 
 	(*User variables*)
 	// User alarm event
@@ -31,8 +32,9 @@ END_VAR
 fbInfluxDBRecorder();
 
 // Initialize alarm event calculatror and IoT service
-alarm_db_exporter.machine_name := 'Machine-1';
-alarm_calculator.exporter := alarm_db_exporter;
+alarm_db_listener.machine_name := 'Machine-1';
+alarm_calculator.add_listener(alarm_db_listener);
+alarm_calculator.add_listener(simple_listener);
 
 fbTestAlarm1(
 	bEvt := error_condition, // Activate event by alarm condition.
@@ -60,22 +62,9 @@ is_unconfirm := alarm_calculator.is_unconfirmed(severity := TcEventSeverity.Warn
 ]]></ST>
     </Implementation>
     <LineIds Name="MAIN">
-      <LineId Id="156" Count="0" />
-      <LineId Id="129" Count="0" />
-      <LineId Id="131" Count="1" />
-      <LineId Id="134" Count="1" />
-      <LineId Id="137" Count="2" />
-      <LineId Id="214" Count="0" />
-      <LineId Id="140" Count="3" />
-      <LineId Id="180" Count="2" />
-      <LineId Id="215" Count="0" />
-      <LineId Id="183" Count="2" />
-      <LineId Id="179" Count="0" />
-      <LineId Id="163" Count="0" />
-      <LineId Id="144" Count="1" />
-      <LineId Id="159" Count="0" />
-      <LineId Id="161" Count="1" />
-      <LineId Id="147" Count="1" />
+      <LineId Id="264" Count="5" />
+      <LineId Id="295" Count="0" />
+      <LineId Id="270" Count="23" />
       <LineId Id="37" Count="0" />
     </LineIds>
   </POU>

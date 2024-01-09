@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
-  <Itf Name="I_EventExporter" Id="{4f3cef88-0c03-433a-a68e-c25d8f9a39f1}">
-    <Declaration><![CDATA[INTERFACE I_EventExporter
+  <Itf Name="I_Observer" Id="{4f3cef88-0c03-433a-a68e-c25d8f9a39f1}">
+    <Declaration><![CDATA[INTERFACE I_Observer
 ]]></Declaration>
     <Method Name="send_signal" Id="{3d4aab7e-3102-477b-bc85-53b61297b67a}">
       <Declaration><![CDATA[METHOD send_signal : BOOL

@@ -3,8 +3,9 @@
   <POU Name="FB_AlarmCalculator" Id="{f9fb4732-2a58-4724-8e9e-37487e3bcd05}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_AlarmCalculator
 VAR CONSTANT
-	NUM_OF_SEVERITIES: UINT  := 5;
-	COMMAND_QUEUE_BUFFER_SIZE :UINT := 20;
+	NUM_OF_SEVERITIES: INT  := 5;
+	COMMAND_QUEUE_BUFFER_SIZE :INT := 20;
+	NUM_OF_LISTENER: INT := 10;
 END_VAR
 VAR_INPUT
 	bRefresh	: BOOL;			// make true at momentally (1 cycle) when 
@@ -14,16 +15,16 @@ END_VAR
 VAR
 	al_index	: UINT := 0;
 	p_alarms	: ARRAY [0..AlarmEventParam.ALARM_MAX_COUNT - 1] OF POINTER TO FB_Alarm;
-	_exporter	: I_EventExporter;
+	_listeners	: ARRAY [1..NUM_OF_LISTENER] OF I_Observer;
 	//_p_exporter	: POINTER TO FB_AlarmDBExporter;
 	state_counter	: ARRAY [0..NUM_OF_SEVERITIES - 1] OF EventSeverityStatusMember := [
 		(severity := TcEventSeverity.Verbose),(severity := TcEventSeverity.Info),(severity := TcEventSeverity.Warning),
 		(severity := TcEventSeverity.Error),(severity := TcEventSeverity.Critical)
 	];
 	_counter 	:UINT;
-	i			: UINT;
-	j			: UINT;
-
+	i			: INT;
+	j			: INT;
+	
 	
 	// queue controll
 	
@@ -39,8 +40,7 @@ VAR
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[
-FOR j := 0 TO NUM_OF_SEVERITIES - 1 DO
+      <ST><![CDATA[FOR j := 0 TO NUM_OF_SEVERITIES - 1 DO
 	state_counter[j].active_counter := 0;
 	state_counter[j].raised_counter := 0;
 	state_counter[j].confirmed_counter := 0;		
@@ -68,34 +68,58 @@ CASE _step OF
 			_step := 10;
 		END_IF
 	10:
-		IF _exporter <> 0 AND pAlarm <> 0 THEN
-			IF pAlarm^.get_alarm_text(_lang_code) THEN
-				_exporter.send_signal(pAlarm);
-				_step := 0;
-			END_IF
-		END_IF
+		FOR i := 1 TO NUM_OF_LISTENER DO
+			IF _listeners[i] <> 0 AND pAlarm <> 0 THEN
+				IF pAlarm^.get_alarm_text(_lang_code) THEN
+					_listeners[i].send_signal(pAlarm);
+					_step := 0;
+				END_IF
+			END_IF			
+		END_FOR
 END_CASE]]></ST>
     </Implementation>
-    <Property Name="exporter" Id="{8ed77c58-6df9-432f-95d3-8678854c6442}">
-      <Declaration><![CDATA[PROPERTY exporter : I_EventExporter]]></Declaration>
-      <Get Name="Get" Id="{54da41b4-c931-4a3f-9a42-6be2ba6929e4}">
-        <Declaration><![CDATA[
+    <Method Name="add_listener" Id="{8921ab30-f5c2-4c4b-994e-23daf3905bf7}">
+      <Declaration><![CDATA[METHOD add_listener : INT
+VAR_INPUT
+	listener: I_Observer;
+END_VAR
 VAR
+	i :INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[add_listener := 0;
+IF listener = 0 THEN
+	RETURN;
+END_IF
+
+FOR i := 1 TO NUM_OF_LISTENER DO
+	IF _listeners[i] = 0 THEN
+		_listeners[i] := listener;
+		add_listener := i;
+		RETURN;
+	END_IF
+END_FOR
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="clear_listners" Id="{ef54ad0c-c9b9-4e2f-92f1-349b1e4d19d3}">
+      <Declaration><![CDATA[METHOD clear_listners : BOOL
+VAR_INPUT
+END_VAR
+VAR
+	i : INT;
 END_VAR
 ]]></Declaration>
-        <Implementation>
-          <ST><![CDATA[exporter := _exporter;]]></ST>
-        </Implementation>
-      </Get>
-      <Set Name="Set" Id="{d4e4446f-c0b4-4adc-b636-349021aa1b48}">
-        <Declaration><![CDATA[VAR
-END_VAR
-]]></Declaration>
-        <Implementation>
-          <ST><![CDATA[_exporter := exporter;]]></ST>
-        </Implementation>
-      </Set>
-    </Property>
+      <Implementation>
+        <ST><![CDATA[clear_listners := FALSE;
+FOR i := 1 TO NUM_OF_LISTENER DO
+	_listeners[i] := 0;
+END_FOR
+clear_listners := TRUE;
+]]></ST>
+      </Implementation>
+    </Method>
     <Property Name="full" Id="{e3de9c67-ef8c-4885-b0d0-c9c6d8211ff9}">
       <Declaration><![CDATA[PROPERTY full : BOOL]]></Declaration>
       <Get Name="Get" Id="{f87d1f5c-efdd-40b1-a1b7-dd2f20e9ba27}">
@@ -258,31 +282,59 @@ al_index := al_index + 1;
 reg_alarm := TRUE;]]></ST>
       </Implementation>
     </Method>
+    <Method Name="rm_listener" Id="{6dd38a8c-f36d-42a8-ae40-3779706ac0f0}">
+      <Declaration><![CDATA[METHOD rm_listener : INT
+VAR_INPUT
+	listener : I_Observer;
+END_VAR
+VAR
+	i : INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[rm_listener := 0;
+IF listener = 0 THEN
+	RETURN;
+END_IF
+
+FOR i := 1 TO NUM_OF_LISTENER DO
+	IF _listeners[i] = listener THEN
+		_listeners[i] := 0;
+		rm_listener := i;
+		RETURN;
+	END_IF
+END_FOR
+]]></ST>
+      </Implementation>
+    </Method>
     <LineIds Name="FB_AlarmCalculator">
-      <LineId Id="593" Count="0" />
-      <LineId Id="693" Count="0" />
-      <LineId Id="696" Count="2" />
-      <LineId Id="695" Count="0" />
-      <LineId Id="685" Count="0" />
-      <LineId Id="703" Count="0" />
-      <LineId Id="610" Count="2" />
-      <LineId Id="616" Count="5" />
-      <LineId Id="705" Count="2" />
-      <LineId Id="596" Count="0" />
-      <LineId Id="474" Count="7" />
-      <LineId Id="504" Count="0" />
-      <LineId Id="510" Count="0" />
-      <LineId Id="506" Count="0" />
-      <LineId Id="509" Count="0" />
-      <LineId Id="511" Count="0" />
-      <LineId Id="507" Count="0" />
+      <LineId Id="816" Count="27" />
+      <LineId Id="850" Count="0" />
+      <LineId Id="853" Count="4" />
+      <LineId Id="851" Count="1" />
       <LineId Id="473" Count="0" />
     </LineIds>
-    <LineIds Name="FB_AlarmCalculator.exporter.Get">
-      <LineId Id="2" Count="0" />
+    <LineIds Name="FB_AlarmCalculator.add_listener">
+      <LineId Id="11" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="16" Count="1" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="20" Count="1" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="18" Count="0" />
     </LineIds>
-    <LineIds Name="FB_AlarmCalculator.exporter.Set">
-      <LineId Id="2" Count="0" />
+    <LineIds Name="FB_AlarmCalculator.clear_listners">
+      <LineId Id="17" Count="0" />
+      <LineId Id="6" Count="0" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_AlarmCalculator.full.Get">
       <LineId Id="2" Count="0" />
@@ -326,6 +378,12 @@ reg_alarm := TRUE;]]></ST>
       <LineId Id="31" Count="0" />
       <LineId Id="28" Count="1" />
       <LineId Id="12" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_AlarmCalculator.rm_listener">
+      <LineId Id="6" Count="7" />
+      <LineId Id="22" Count="1" />
+      <LineId Id="14" Count="1" />
+      <LineId Id="21" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>
