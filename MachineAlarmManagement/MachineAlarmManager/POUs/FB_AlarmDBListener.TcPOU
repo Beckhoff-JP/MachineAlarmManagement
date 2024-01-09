@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
-  <POU Name="FB_AlarmDBExporter" Id="{8bc61472-16bb-4769-ad40-cbce77b10d49}" SpecialFunc="None">
-    <Declaration><![CDATA[FUNCTION_BLOCK FB_AlarmDBExporter IMPLEMENTS I_EventExporter
+  <POU Name="FB_AlarmDBListener" Id="{8bc61472-16bb-4769-ad40-cbce77b10d49}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_AlarmDBListener IMPLEMENTS I_Observer
 VAR
 	_lang_code :DINT := 1033;
 	// For alarm IoT report
@@ -80,20 +80,20 @@ q_put(lData := pAlarm);
 *)]]></ST>
       </Implementation>
     </Method>
-    <LineIds Name="FB_AlarmDBExporter">
+    <LineIds Name="FB_AlarmDBListener">
       <LineId Id="9" Count="0" />
     </LineIds>
-    <LineIds Name="FB_AlarmDBExporter.FB_init">
+    <LineIds Name="FB_AlarmDBListener.FB_init">
       <LineId Id="7" Count="0" />
       <LineId Id="14" Count="0" />
     </LineIds>
-    <LineIds Name="FB_AlarmDBExporter.machine_name.Get">
+    <LineIds Name="FB_AlarmDBListener.machine_name.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
-    <LineIds Name="FB_AlarmDBExporter.machine_name.Set">
+    <LineIds Name="FB_AlarmDBListener.machine_name.Set">
       <LineId Id="2" Count="0" />
     </LineIds>
-    <LineIds Name="FB_AlarmDBExporter.send_signal">
+    <LineIds Name="FB_AlarmDBListener.send_signal">
       <LineId Id="95" Count="14" />
       <LineId Id="68" Count="0" />
       <LineId Id="89" Count="0" />

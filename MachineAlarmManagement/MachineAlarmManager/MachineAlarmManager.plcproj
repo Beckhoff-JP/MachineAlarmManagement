@@ -19,7 +19,7 @@
     <Company>Beckhoff Automation K.K.</Company>
     <Released>true</Released>
     <Title>machine_alarm_manager</Title>
-    <ProjectVersion>1.0.1.1</ProjectVersion>
+    <ProjectVersion>1.0.2.0</ProjectVersion>
     <LibraryCategories>
       <LibraryCategory>
         <Id>{f484dac6-21b6-4d52-a832-fa3cc2ceea83}</Id>
@@ -75,6 +75,9 @@
     <DocFormat>reStructuredText</DocFormat>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="DUTs\AlarmMessage.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="DUTs\DataTag.TcDUT">
       <SubType>Code</SubType>
     </Compile>
@@ -101,10 +104,13 @@
     <Compile Include="POUs\FB_AlarmCalculator.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="POUs\FB_AlarmDBExporter.TcPOU">
+    <Compile Include="POUs\FB_AlarmDBListener.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="POUs\I_EventExporter.TcIO">
+    <Compile Include="POUs\FB_AlarmSimpleListener.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\I_Observer.TcIO">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="POUs\MAIN.TcPOU">
