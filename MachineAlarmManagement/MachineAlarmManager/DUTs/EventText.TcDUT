@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <DUT Name="EventText" Id="{5cc6ca6e-1a7b-4282-90cd-b8e54235fe02}">
+    <Declaration><![CDATA[TYPE EventText :
+STRUCT
+	event : I_TcEventBase;
+	text  : REFERENCE TO STRING;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

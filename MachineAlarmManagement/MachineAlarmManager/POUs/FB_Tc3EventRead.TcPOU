@@ -1,0 +1,137 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <POU Name="FB_Tc3EventRead" Id="{037aed9e-3ff5-4d2c-aad1-5efc5a7a5632}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Tc3EventRead IMPLEMENTS InterfaceEventViewer
+VAR CONSTANT
+	DISP_ROWS : UDINT := 80;
+END_VAR
+VAR_INPUT
+	tzinfo : ST_TimeZoneInformation;
+END_VAR
+VAR_OUTPUT
+	stAlarmEvents	: ARRAY [1..DISP_ROWS] OF ST_ReadEventW;
+	stAlarmhistory 	: ARRAY [1..DISP_ROWS] OF ST_ReadEventW;
+END_VAR
+VAR
+	row : UDINT := 1;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="_create_current_table" Id="{68bb58e5-9921-4bf5-9711-a031fb36b796}">
+      <Declaration><![CDATA[METHOD PRIVATE _create_current_table : BOOL
+VAR_INPUT
+	event_container : REFERENCE TO EventContainer;
+	row		: UDINT;
+	stDate	: STRING;
+	stTime	: STRING;
+END_VAR
+VAR_INST
+	iso_datetime : STRING;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[stAlarmEvents[row].sComputer := 'Computer';
+stAlarmEvents[row].sSource := 'Source';
+
+stAlarmEvents[row].bConfirmable := event_container.event.eConfirmationState <> TcEventConfirmationState.NotSupported;
+CASE event_container.event.eSeverity OF 
+	TcEventSeverity.Critical:
+		stAlarmEvents[row].nClass := Tc2EventClass.TCEVENTCLASS_PARAMERROR;		
+	TcEventSeverity.Error:
+		stAlarmEvents[row].nClass := Tc2EventClass.TCEVENTCLASS_ALARM;
+	TcEventSeverity.Info:
+		stAlarmEvents[row].nClass := Tc2EventClass.TCEVENTCLASS_STATEINFO;
+	TcEventSeverity.Verbose:
+		stAlarmEvents[row].nClass := Tc2EventClass.TCEVENTCLASS_MESSAGE;
+	TcEventSeverity.Warning:
+		stAlarmEvents[row].nClass := Tc2EventClass.TCEVENTCLASS_WARNING;
+END_CASE
+
+stAlarmEvents[row].nConfirmState := event_container.event.eConfirmationState;
+stAlarmEvents[row].nEventId := event_container.event.nEventId;
+stAlarmEvents[row].sMessageText := event_container.event_text;
+
+
+iso_datetime := FILETIME64_TO_ISO8601(
+					fileTime := event_container.event.nTimeRaised,
+					nBias := TO_INT(tzInfo.bias), 
+					bUTC :=TRUE, 
+					nPrecision := 0
+				);
+stAlarmEvents[row].sDate := MID(iso_datetime, 10, 1);
+stAlarmEvents[row].sTime := MID(iso_datetime, 8, 12);
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="clear" Id="{67504af2-00d8-40a8-85f5-8d6225afe6eb}">
+      <Declaration><![CDATA[{warning 'add method implementation '}
+METHOD clear : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[row := 1;
+MEMSET(ADR(stAlarmEvents), 0, SIZEOF(stAlarmEvents));]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="show" Id="{0c22d4db-f791-4aef-8e7f-c26c35c4cd8d}">
+      <Declaration><![CDATA[METHOD show : BOOL
+VAR_INPUT
+	event_container : REFERENCE TO EventContainer;
+END_VAR
+VAR_INST
+	iso_datetime : STRING;
+END_VAR
+VAR
+	stDate	: STRING;
+	stTime	: STRING;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT __ISVALIDREF(event_container) OR row > DISP_ROWS THEN
+	show := TRUE;
+	RETURN;
+END_IF
+
+iso_datetime := FILETIME64_TO_ISO8601(
+					fileTime := event_container.event.nTimeRaised,
+					nBias := TO_INT(tzInfo.bias), 
+					bUTC :=TRUE, 
+					nPrecision := 0
+				);
+
+stDate := MID(iso_datetime, 10, 1);
+stTime := MID(iso_datetime, 8, 12);
+
+_create_current_table(event_container, row, stDate, stTime);
+			
+row := row + 1;
+show := FALSE;]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_Tc3EventRead">
+      <LineId Id="42" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Tc3EventRead._create_current_table">
+      <LineId Id="11" Count="1" />
+      <LineId Id="14" Count="28" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Tc3EventRead.clear">
+      <LineId Id="7" Count="0" />
+      <LineId Id="4" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Tc3EventRead.show">
+      <LineId Id="347" Count="3" />
+      <LineId Id="422" Count="0" />
+      <LineId Id="424" Count="4" />
+      <LineId Id="423" Count="0" />
+      <LineId Id="430" Count="0" />
+      <LineId Id="436" Count="0" />
+      <LineId Id="431" Count="0" />
+      <LineId Id="439" Count="0" />
+      <LineId Id="438" Count="0" />
+      <LineId Id="437" Count="0" />
+      <LineId Id="387" Count="0" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

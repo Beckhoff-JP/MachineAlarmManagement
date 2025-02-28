@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <DUT Name="Tc2EventClass" Id="{90f36664-feda-4ebd-a663-62e22d0b6f47}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE Tc2EventClass :
+(
+	TCEVENTCLASS_NONE := 0,
+	TCEVENTCLASS_MAINTENANCE := 1,
+	TCEVENTCLASS_MESSAGE :=2,
+	TCEVENTCLASS_HINT :=3,
+	TCEVENTCLASS_STATEINFO :=4,
+	TCEVENTCLASS_INSTRUCTION :=5,
+	TCEVENTCLASS_WARNING :=6,
+	TCEVENTCLASS_ALARM :=7,
+	TCEVENTCLASS_PARAMERROR :=8,
+	TCEVENTCLASS_MAX
+)DWORD := TCEVENTCLASS_NONE;
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>
