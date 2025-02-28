@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <DUT Name="primitives" Id="{45702697-971a-46e9-9475-8bf70fe9dc54}">
+    <Declaration><![CDATA[TYPE primitives :
+UNION
+	ARGTYPE_BYTE : BYTE;
+    ARGTYPE_WORD : WORD;
+    ARGTYPE_DWORD : DWORD;
+    ARGTYPE_REAL : REAL;
+    ARGTYPE_LREAL : LREAL;
+    ARGTYPE_SINT : SINT;
+    ARGTYPE_INT : INT;
+    ARGTYPE_DINT : DINT;
+    ARGTYPE_USINT : USINT;
+    ARGTYPE_UINT : UINT;
+    ARGTYPE_UDINT : UDINT;
+    ARGTYPE_STRING : STRING;
+    ARGTYPE_BOOL 	: BOOL;
+    ARGTYPE_ULARGE	: ULINT;
+    ARGTYPE_UHUGE 	: T_UHUGE_INTEGER;
+    ARGTYPE_LARGE	: LINT;
+    ARGTYPE_HUGE 	: T_HUGE_INTEGER;
+    ARGTYPE_LWORD 	: LWORD;
+END_UNION
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

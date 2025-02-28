@@ -1,201 +1,193 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
   <POU Name="FB_Alarm" Id="{fd59e4a9-d269-4936-83d6-88a7cff9a7f1}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_Alarm EXTENDS FB_TcAlarm
 VAR_INPUT
-	bEvt		: BOOL;				// Set true during something event occured.
-	module_name :STRING;			// module name where event occured.
-	bConfirm	: BOOL;				// True momentally after operator confirming event.
-	bLatch		: BOOL := FALSE;	// Keep alarm status raised after bEvt being FALSE.
-	bReset		: BOOL := FALSE;	// When the bLatch flag is True and bEvt is False, this flag can be unlatch when raised. 
-END_VAR
-VAR_OUTPUT
-	event_raised	:BOOL;			// Set true during alarm event is activated
-	event_reset		:BOOL;			// Set true at 1 cycle when event factor disappeared.
-	event_cleared	:BOOL;			// Set true at 1 cycle when event would be deactivated.
-	event_confirmed	:BOOL;			// Set true at 1 cycle when event would be confirmed.
+	set_activate	: BOOL;				// Set true during something event occured.
+	set_confirm		: BOOL;				// True momentally after operator confirming event.
+	set_clear		: BOOL := FALSE;	// When the bLatch flag is True and bEvt is False, this flag can be unlatch when raised. 
+	module_name 	:STRING;			// module name where event occured.
+	nLangId			: DINT := 1033;		// Language code
 END_VAR
 VAR
-	exist_wait_for_confirmation :BOOL;
-	bMemConfirmEvent :BOOL;
-	bMemEvt: BOOL;
-	bMemReset: BOOL;
-	bMemActive: BOOL;
-	{attribute 'TcEncoding' := 'UTF-8'}
-	_alarm_text : STRING;
-	_last_raise_time : ULINT;
-	_last_reset_time : ULINT;
-	_refresh_alarm_text: BOOL;
+	set_activate_mem	: BOOL;				// Set true during something event occured.	
+	_with_reset_operation : BOOL;
 END_VAR
 VAR PERSISTENT
 	_sequence_number	: ULINT;	
 END_VAR]]></Declaration>
     <Implementation>
-      <ST><![CDATA[IF bEvt 
-	AND NOT bMemEvt 
-	AND SUPER^.eConfirmationState <> TcEventConfirmationState.WaitForConfirmation THEN
-	event_raised := TRUE;
+      <ST><![CDATA[IF set_activate  
+	AND NOT SUPER^.bRaised AND
+	SUPER^.eConfirmationState <> TcEventConfirmationState.WaitForConfirmation THEN
 	SUPER^.Raise(0);
-ELSE
-	event_raised := FALSE;
+	SUPER^.ipArguments.Clear();
 END_IF
 
-event_reset := NOT bEvt AND bMemEvt;
-
-IF event_raised THEN
-	_last_raise_time := F_GetSystemTime();
-	IF NOT bMemActive THEN
-		_sequence_number :=_sequence_number + 1;
-	END_IF
-END_IF
-
-IF bConfirm THEN
+IF set_confirm THEN
 	SUPER^.Confirm(0);
 END_IF
 
-exist_wait_for_confirmation := SUPER^.eConfirmationState = TcEventConfirmationState.WaitForConfirmation;
-event_confirmed := NOT exist_wait_for_confirmation AND bMemConfirmEvent;
 
-IF bLatch THEN
-	IF NOT bEvt 
-		AND bReset 
-		AND NOT bMemReset 
-		AND NOT exist_wait_for_confirmation THEN
+//IF SUPER^.eConfirmationState = TcEventConfirmationState.NotSupported THEN
+IF NOT _with_reset_operation THEN
+	IF set_activate_mem AND NOT set_activate THEN
 		SUPER^.Clear(0, TRUE);
 	END_IF
 ELSE
-	IF bMemEvt AND NOT bEvt THEN
+	IF NOT set_activate 
+		AND set_clear THEN
 		SUPER^.Clear(0, TRUE);
 	END_IF
 END_IF
 
-event_cleared := NOT SUPER^.bActive AND bMemActive;
-
-IF event_cleared THEN
-	_last_reset_time := F_GetSystemTime();
-END_IF
-
-// Memory variables as a last cycle.
-
-bMemEvt := bEvt;
-bMemReset := bReset;
-bMemConfirmEvent := exist_wait_for_confirmation;
-bMemActive := SUPER^.bActive;
-]]></ST>
+set_activate_mem	:= set_activate;
+set_clear := FALSE;
+set_confirm := FALSE;]]></ST>
     </Implementation>
-    <Property Name="alarm_text" Id="{2d576994-e408-408b-b516-5d1698089ace}">
-      <Declaration><![CDATA[{attribute 'TcEncoding' := 'UTF-8'}
-PROPERTY alarm_text : STRING]]></Declaration>
-      <Get Name="Get" Id="{21f2c630-8937-49b7-b40a-e033b227cc84}">
-        <Declaration><![CDATA[VAR
-END_VAR
-]]></Declaration>
-        <Implementation>
-          <ST><![CDATA[alarm_text := _alarm_text;]]></ST>
-        </Implementation>
-      </Get>
-    </Property>
-    <Method Name="FB_init" Id="{dabcb318-47a7-4cd8-bc7f-b45edc1cf196}">
-      <Declaration><![CDATA[METHOD FB_init : BOOL
+    <Method Name="add_arguments" Id="{69685192-0445-4c2c-97ed-e964df70a1ba}">
+      <Declaration><![CDATA[METHOD add_arguments : BOOL
 VAR_INPUT
-	bInitRetains : BOOL; // if TRUE, the retain variables are initialized (warm start / cold start)
-	bInCopyCode : BOOL;  // if TRUE, the instance afterwards gets moved into the copy code (online change)
-	evtEntry	: TcEventEntry; // Specify event class and entry name
-	calculator : REFERENCE TO FB_AlarmCalculator; // Specify pointer to FB_AlarmCalculator.
+	argument_value : T_Arg;
 END_VAR
-]]></Declaration>
+VAR
+	_temp : primitives;
+END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[calculator.reg_alarm(p_alarm := THIS);
-SUPER^.CreateEx(evtEntry, TRUE, 0);
-]]></ST>
+        <ST><![CDATA[add_arguments := TRUE;
+CASE argument_value.eType OF
+    E_ArgType.ARGTYPE_BYTE:
+		MEMCPY(ADR(_temp.ARGTYPE_BYTE), argument_value.pData, argument_value.cbLen);
+		SUPER^.ipArguments.AddByte(_temp.ARGTYPE_BYTE);
+    E_ArgType.ARGTYPE_WORD:
+		MEMCPY(ADR(_temp.ARGTYPE_WORD), argument_value.pData, argument_value.cbLen);
+		SUPER^.ipArguments.AddWord(_temp.ARGTYPE_WORD);
+    E_ArgType.ARGTYPE_DWORD:
+		MEMCPY(ADR(_temp.ARGTYPE_DWORD), argument_value.pData, argument_value.cbLen);
+		SUPER^.ipArguments.AddDWord(_temp.ARGTYPE_DWORD);
+    E_ArgType.ARGTYPE_REAL:
+		MEMCPY(ADR(_temp.ARGTYPE_REAL), argument_value.pData, argument_value.cbLen);
+		SUPER^.ipArguments.AddReal(_temp.ARGTYPE_REAL);
+    E_ArgType.ARGTYPE_LREAL:
+		MEMCPY(ADR(_temp.ARGTYPE_LREAL), argument_value.pData, argument_value.cbLen);
+		SUPER^.ipArguments.AddLreal(_temp.ARGTYPE_LREAL);
+    E_ArgType.ARGTYPE_SINT:
+		MEMCPY(ADR(_temp.ARGTYPE_SINT), argument_value.pData, argument_value.cbLen);
+		SUPER^.ipArguments.AddSint(_temp.ARGTYPE_SINT);
+    E_ArgType.ARGTYPE_INT:
+		MEMCPY(ADR(_temp.ARGTYPE_INT), argument_value.pData, argument_value.cbLen);
+		SUPER^.ipArguments.AddInt(_temp.ARGTYPE_INT);
+    E_ArgType.ARGTYPE_DINT:
+		MEMCPY(ADR(_temp.ARGTYPE_DINT), argument_value.pData, argument_value.cbLen);
+		SUPER^.ipArguments.AddDint(_temp.ARGTYPE_DINT);
+    E_ArgType.ARGTYPE_USINT:
+		MEMCPY(ADR(_temp.ARGTYPE_USINT), argument_value.pData, argument_value.cbLen);
+		SUPER^.ipArguments.AddUsint(_temp.ARGTYPE_USINT);
+    E_ArgType.ARGTYPE_UINT:
+		MEMCPY(ADR(_temp.ARGTYPE_UINT), argument_value.pData, argument_value.cbLen);
+		SUPER^.ipArguments.AddUint(_temp.ARGTYPE_UINT);
+    E_ArgType.ARGTYPE_UDINT:
+		MEMCPY(ADR(_temp.ARGTYPE_UDINT), argument_value.pData, argument_value.cbLen);
+		SUPER^.ipArguments.AddUdint(_temp.ARGTYPE_UDINT);
+    E_ArgType.ARGTYPE_STRING:
+		MEMCPY(ADR(_temp.ARGTYPE_STRING), argument_value.pData, argument_value.cbLen);
+		SUPER^.ipArguments.AddString(_temp.ARGTYPE_STRING);
+    E_ArgType.ARGTYPE_BOOL:
+		MEMCPY(ADR(_temp.ARGTYPE_BOOL), argument_value.pData, argument_value.cbLen);
+		SUPER^.ipArguments.AddBool(_temp.ARGTYPE_BOOL);
+    E_ArgType.ARGTYPE_ULARGE:
+		MEMCPY(ADR(_temp.ARGTYPE_ULARGE), argument_value.pData, argument_value.cbLen);
+		SUPER^.ipArguments.AddULInt(_temp.ARGTYPE_ULARGE);
+    E_ArgType.ARGTYPE_LARGE:
+		MEMCPY(ADR(_temp.ARGTYPE_LARGE), argument_value.pData, argument_value.cbLen);
+		SUPER^.ipArguments.AddLint(_temp.ARGTYPE_LARGE);
+	ELSE
+		add_arguments := FALSE;
+END_CASE]]></ST>
       </Implementation>
     </Method>
-    <Method Name="get_alarm_text" Id="{5abff93c-6a62-4cad-aefd-c22f58a80c9b}">
-      <Declaration><![CDATA[METHOD get_alarm_text : BOOL
-VAR_INPUT
-	nLangId	:	DINT  := 1031;// Language code
-END_VAR
-
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[get_alarm_text := RequestEventText(nLangId := nLangId, sResult := _alarm_text, nResultSize := SIZEOF(_alarm_text));
-(*
-IF get_alarm_text := RequestEventText(nLangId := language_id, sResult := _alarm_text, nResultSize := SIZEOF(_alarm_text)) THEN
-	UTF8_TO_STRING(ADR(_alarm_text), ADR(_alarm_text), SIZEOF(_alarm_text));
-END_IF
-*)]]></ST>
-      </Implementation>
-    </Method>
-    <Property Name="last_raise_time" Id="{c92c6216-dcb6-4222-8b82-f4b628a09b1e}">
-      <Declaration><![CDATA[PROPERTY last_raise_time : ULINT]]></Declaration>
-      <Get Name="Get" Id="{81f7ec9d-644f-44d0-be24-493ce9c7e278}">
+    <Property Name="bWithResetOperation" Id="{93409fb2-b009-453f-9e05-096003b97aff}">
+      <Declaration><![CDATA[PROPERTY bWithResetOperation : BOOL]]></Declaration>
+      <Get Name="Get" Id="{6866ae2a-f7a5-4ca0-b3b7-125471affd74}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
         <Implementation>
-          <ST><![CDATA[last_raise_time := _last_raise_time;
-]]></ST>
+          <ST><![CDATA[bWithResetOperation := _with_reset_operation;]]></ST>
         </Implementation>
       </Get>
-    </Property>
-    <Property Name="last_reset_time" Id="{c7547f0f-b902-4ee5-bff2-0d368a41b110}">
-      <Declaration><![CDATA[PROPERTY last_reset_time : ULINT]]></Declaration>
-      <Get Name="Get" Id="{63854fd2-5b71-4c5c-98c1-738319711fde}">
+      <Set Name="Set" Id="{78fb1828-c423-4ff0-b6d3-caf1c6533b25}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
         <Implementation>
-          <ST><![CDATA[last_reset_time := _last_reset_time;
-]]></ST>
+          <ST><![CDATA[_with_reset_operation := bWithResetOperation;]]></ST>
         </Implementation>
-      </Get>
-    </Property>
-    <Property Name="sequence_number" Id="{2d2faeb8-c700-47a3-baa9-26f155d2b8ea}">
-      <Declaration><![CDATA[PROPERTY sequence_number : ULINT]]></Declaration>
-      <Get Name="Get" Id="{f1ae68f4-2371-4cd4-83bd-eb8d42610b37}">
-        <Declaration><![CDATA[VAR
-END_VAR
-]]></Declaration>
-        <Implementation>
-          <ST><![CDATA[sequence_number := _sequence_number;]]></ST>
-        </Implementation>
-      </Get>
+      </Set>
     </Property>
     <LineIds Name="FB_Alarm">
-      <LineId Id="617" Count="11" />
-      <LineId Id="685" Count="0" />
-      <LineId Id="689" Count="0" />
-      <LineId Id="692" Count="0" />
-      <LineId Id="691" Count="0" />
-      <LineId Id="631" Count="0" />
-      <LineId Id="633" Count="25" />
-      <LineId Id="677" Count="1" />
-      <LineId Id="670" Count="0" />
-      <LineId Id="672" Count="3" />
-      <LineId Id="366" Count="0" />
+      <LineId Id="1275" Count="2" />
+      <LineId Id="1279" Count="2" />
+      <LineId Id="1286" Count="6" />
+      <LineId Id="1392" Count="0" />
+      <LineId Id="1293" Count="8" />
+      <LineId Id="1020" Count="0" />
+      <LineId Id="1349" Count="0" />
+      <LineId Id="1351" Count="0" />
+      <LineId Id="1369" Count="0" />
     </LineIds>
-    <LineIds Name="FB_Alarm.alarm_text.Get">
-      <LineId Id="2" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_Alarm.FB_init">
-      <LineId Id="26" Count="1" />
-      <LineId Id="10" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_Alarm.get_alarm_text">
-      <LineId Id="29" Count="1" />
+    <LineIds Name="FB_Alarm.add_arguments">
+      <LineId Id="67" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="32" Count="0" />
       <LineId Id="12" Count="0" />
-      <LineId Id="20" Count="1" />
-      <LineId Id="9" Count="0" />
+      <LineId Id="37" Count="1" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="39" Count="1" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="43" Count="1" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="51" Count="0" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="55" Count="0" />
+      <LineId Id="52" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="58" Count="0" />
+      <LineId Id="57" Count="0" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="60" Count="0" />
+      <LineId Id="59" Count="0" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="62" Count="0" />
+      <LineId Id="61" Count="0" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="64" Count="0" />
+      <LineId Id="63" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="65" Count="1" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="8" Count="0" />
     </LineIds>
-    <LineIds Name="FB_Alarm.last_raise_time.Get">
+    <LineIds Name="FB_Alarm.bWithResetOperation.Get">
       <LineId Id="2" Count="0" />
-      <LineId Id="5" Count="0" />
     </LineIds>
-    <LineIds Name="FB_Alarm.last_reset_time.Get">
-      <LineId Id="2" Count="0" />
-      <LineId Id="5" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_Alarm.sequence_number.Get">
+    <LineIds Name="FB_Alarm.bWithResetOperation.Set">
       <LineId Id="2" Count="0" />
     </LineIds>
   </POU>

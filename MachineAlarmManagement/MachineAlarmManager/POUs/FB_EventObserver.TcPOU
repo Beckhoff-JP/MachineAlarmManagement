@@ -1,0 +1,134 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <POU Name="FB_EventObserver" Id="{021ae7bc-67fb-4198-ae58-68bc1ddd7ba2}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_EventObserver EXTENDS FB_ListenerBase2
+VAR_INPUT
+	event_class : GUID;
+	nLangId		: DINT := 1033;
+	subscribe : BOOL := TRUE;
+END_VAR
+VAR_OUTPUT
+	subscribed	: BOOL;
+END_VAR
+VAR
+	i : UDINT;
+	fbListenerFilter : FB_TcEventFilter; 
+	active_alarm_count : UDINT;
+	_queue	: FB_TcEventQueue;
+	_event_table : FB_TcEventTable;
+	init :BOOL;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[_queue.nLangId := nLangId;
+
+IF NOT init THEN
+	_event_table.queue REF= _queue;
+	init := TRUE;
+END_IF
+
+IF subscribe AND NOT THIS^.bSubscribed THEN 
+	fbListenerFilter.Clear().EventClass.EqualTo(event_class); //define all events (messages and alarms) from this eventclass   
+	THIS^.Subscribe2(fbListenerFilter); //subscribe to retrieve defined events
+END_IF
+
+IF event_class.DATA1 <> 0 THEN
+	_event_table.event_class := event_class;
+END_IF
+
+IF NOT subscribe AND THIS^.bSubscribed THEN 
+	THIS^.Unsubscribe();
+END_IF 
+
+subscribed := THIS^.bSubscribed;
+THIS^.Execute();
+_event_table();
+
+]]></ST>
+    </Implementation>
+    <Property Name="event_table" Id="{1321c1da-0ca4-4cf7-830f-70d7e9f77bf8}">
+      <Declaration><![CDATA[PROPERTY event_table : REFERENCE TO FB_TcEventTable]]></Declaration>
+      <Get Name="Get" Id="{22226b2a-b425-4377-bbc0-5b10e16b27e5}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[event_table REF= _event_table;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="OnAlarmCleared" Id="{3f618657-ce0a-4ccd-bbb5-0ccc4b35c738}">
+      <Declaration><![CDATA[METHOD OnAlarmCleared : HRESULT
+VAR_INPUT
+	fbEvent : REFERENCE TO FB_TcEvent;
+END_VAR
+VAR
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[_event_table.remove_event(fbEvent);
+_event_table.create_view();
+OnAlarmCleared := S_OK;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="OnAlarmConfirmed" Id="{1ebb3e3f-f401-4e8d-b200-90b33762ad09}">
+      <Declaration><![CDATA[METHOD OnAlarmConfirmed : HRESULT
+VAR_INPUT
+	fbEvent : REFERENCE TO FB_TcEvent;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[_event_table.create_view();
+OnAlarmConfirmed := S_OK;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="OnAlarmRaised" Id="{20ef54ca-e77b-416e-934a-6039436c68f2}">
+      <Declaration><![CDATA[METHOD OnAlarmRaised : HRESULT
+VAR_INPUT
+	fbEvent : REFERENCE TO FB_TcEvent;
+END_VAR
+VAR
+	_request_text 	: REFERENCE TO FB_RequestEventText;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[_event_table.add_event(fbEvent);
+_queue.put(fbEvent);
+OnAlarmRaised := S_OK;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="OnMessageSent" Id="{44735344-db6b-45da-981a-e54995358440}">
+      <Declaration><![CDATA[METHOD OnMessageSent : HRESULT
+VAR_INPUT
+	fbEvent : REFERENCE TO FB_TcEvent;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[OnMessageSent := S_OK;]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_EventObserver">
+      <LineId Id="332" Count="20" />
+      <LineId Id="360" Count="2" />
+      <LineId Id="167" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_EventObserver.event_table.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_EventObserver.OnAlarmCleared">
+      <LineId Id="95" Count="0" />
+      <LineId Id="101" Count="0" />
+      <LineId Id="107" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_EventObserver.OnAlarmConfirmed">
+      <LineId Id="24" Count="0" />
+      <LineId Id="29" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_EventObserver.OnAlarmRaised">
+      <LineId Id="118" Count="0" />
+      <LineId Id="109" Count="1" />
+    </LineIds>
+    <LineIds Name="FB_EventObserver.OnMessageSent">
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

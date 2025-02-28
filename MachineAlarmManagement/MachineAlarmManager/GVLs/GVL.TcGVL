@@ -1,10 +1,39 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
   <GVL Name="GVL" Id="{e2f827f0-9ef3-40f7-98dd-013705377226}">
-    <Declaration><![CDATA[{attribute 'qualified_only'}
-VAR_GLOBAL CONSTANT
+    <Declaration><![CDATA[VAR_GLOBAL CONSTANT
 	// Database ID
 	TARGET_DBID : UINT := 1;
+END_VAR
+VAR_GLOBAL
+	(*
+	eSeverity ::
+	TYPE TcEventSeverity : (
+		Verbose  := 0, 
+		Info     := 1, 
+		Warning  := 2, 
+		Error    := 3, 
+		Critical := 4);
+	END_TYPE
+	*)
+	AlarmDatabase : ARRAY [1..AlarmEventParam.ALARM_MAX_COUNT] OF ST_EventMetadata := [
+		(	
+			nEventId := 1,				// イベントID 1 
+			eSeverity := 3, 			// TcEventSeverity
+			bWithConfirmation := TRUE,	// 新規アラームと確認済みアラームの区別が必要か否か
+			bWithResetOperation := TRUE	// アラーム解除のリセット操作が必要か否か
+		),
+		(	nEventId := 2, 
+			eSeverity := 2, 
+			bWithConfirmation := TRUE,
+			bWithResetOperation := FALSE
+		),
+		(	nEventId := 3, 
+			eSeverity := 1, 
+			bWithConfirmation := FALSE,
+			bWithResetOperation := TRUE
+		)
+	];
 END_VAR]]></Declaration>
   </GVL>
 </TcPlcObject>

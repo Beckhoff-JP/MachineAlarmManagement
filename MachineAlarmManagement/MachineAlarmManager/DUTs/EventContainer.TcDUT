@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <DUT Name="EventContainer" Id="{b612e6b4-90a5-4f58-b252-1cc5c186438c}">
+    <Declaration><![CDATA[TYPE EventContainer :
+STRUCT
+	event : FB_Alarm;
+	{attribute 'TcEncoding' := 'UTF-8'}
+	event_text	: T_MaxString;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

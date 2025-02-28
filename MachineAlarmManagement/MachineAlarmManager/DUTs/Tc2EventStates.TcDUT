@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <DUT Name="Tc2EventStates" Id="{b9739af8-36cf-4fc8-bf5c-ee783faaf5a0}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE Tc2EventStates :
+(
+	CEVENTSTATE_INVALID := 16#00,
+	TCEVENTSTATE_SIGNALED := 16#01,
+	TCEVENTSTATE_RESET := 16#02,
+	TCEVENTSTATE_CONFIRMED :=16#10,
+	TCEVENTSTATE_RESETCON :=16#12
+)DWORD;
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

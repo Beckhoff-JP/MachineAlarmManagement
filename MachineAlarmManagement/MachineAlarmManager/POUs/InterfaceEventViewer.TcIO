@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <Itf Name="InterfaceEventViewer" Id="{f0fe6b76-22c6-4254-b213-56b0ec69b1b9}">
+    <Declaration><![CDATA[INTERFACE InterfaceEventViewer
+]]></Declaration>
+    <Method Name="clear" Id="{1b0ef198-ec53-4b5e-96b9-b8c37507bbe2}">
+      <Declaration><![CDATA[METHOD clear : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="show" Id="{8555b326-6a37-41fd-9f1b-f223bb9aeabd}">
+      <Declaration><![CDATA[METHOD show : BOOL
+VAR_INPUT
+	event_container : REFERENCE TO EventContainer;
+END_VAR
+]]></Declaration>
+    </Method>
+  </Itf>
+</TcPlcObject>

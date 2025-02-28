@@ -1,11 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
   <GVL Name="AlarmEventParam" Id="{81f4bccd-ade8-4820-bb41-36ccddd6eee3}" ParameterList="True">
     <Declaration><![CDATA[{attribute 'qualified_only'}
 VAR_GLOBAL CONSTANT
-	ALARM_MAX_COUNT: UINT := 256;
-	// Event log queue buffer size
-	EVENT_LOG_BUFFER_SIZE :UINT := 50;
+	ALARM_MAX_COUNT: UINT := 3;
 END_VAR]]></Declaration>
   </GVL>
 </TcPlcObject>

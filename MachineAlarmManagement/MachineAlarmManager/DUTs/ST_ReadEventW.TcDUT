@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <DUT Name="ST_ReadEventW" Id="{0ca105d9-14f3-46d9-8564-5f7d7d802f4f}">
+    <Declaration><![CDATA[TYPE ST_ReadEventW :
+STRUCT
+    nSourceId       : UDINT;
+    nEventId        : UDINT;
+    nClass          : DWORD;
+    nConfirmState   : DWORD;
+    nResetState     : DWORD;
+    sSource         : STRING(255);
+    sDate           : STRING(23);
+    sTime           : STRING(23);
+    sComputer       : STRING;
+    sMessageText    : STRING(255);
+    bQuitMessage    : BOOL;
+    bConfirmable    : BOOL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>
