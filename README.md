@@ -7,7 +7,7 @@
 * Visualization向けに用意された [イベントテーブル](https://infosys.beckhoff.com/content/1033/tc3_plc_intro/3524166155.html?id=4373836669159094324) へ表示させる最適な[ データ構造体 ST_ReadEvent ](https://infosys.beckhoff.com/content/1033/tcplclib_tc2_utilities/14563649035.html?id=1412304240424485687)へ出力する専用のファンクションブロック `FB_Tc3EventRead` を用意しました。この構造体は、TwinCAT2向けのEvent loggerに用意されたもので、TwinCAT3.1 build 4024ではこの型式に出力するネイティブファンクションブロックは用意されていません。
 * `FB_Tc3EventRead` は `InterfaceEventViewer` インターフェースを実装したファンクションブロックとなっています。TwinCAT2向けの構造体`ST_ReadEvent` を出力するだけでなく、同インターフェースを実装することで他に様々な型式のビューを生成する事ができます。
 
-<video src="./assets/visu_alarm.mkv">
+<video src="./assets/visu_alarm.mp4">
 
 ## サンプルコード解説
 
