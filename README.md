@@ -7,7 +7,7 @@
 * Visualization向けに用意された [イベントテーブル](https://infosys.beckhoff.com/content/1033/tc3_plc_intro/3524166155.html?id=4373836669159094324) へ表示させる最適な[ データ構造体 ST_ReadEvent ](https://infosys.beckhoff.com/content/1033/tcplclib_tc2_utilities/14563649035.html?id=1412304240424485687)へ出力する専用のファンクションブロック `FB_Tc3EventRead` を用意しました。この構造体は、TwinCAT2向けのEvent loggerに用意されたもので、TwinCAT3.1 build 4024ではこの型式に出力するネイティブファンクションブロックは用意されていません。
 * `FB_Tc3EventRead` は `InterfaceEventViewer` インターフェースを実装したファンクションブロックとなっています。TwinCAT2向けの構造体`ST_ReadEvent` を出力するだけでなく、同インターフェースを実装することで他に様々な型式のビューを生成する事ができます。
 
-https://github.com/user-attachments/assets/01bd7785-812e-4315-b3ce-96549c7ccbdb
+https://github.com/user-attachments/assets/2241fa2c-d231-45c4-8543-84f3b86c350f
 
 ## サンプルコード解説
 
@@ -265,7 +265,7 @@ Visualizationに表示されるボタンの点滅、点灯制御などを定義�
 
 |変数|データ型|説明|
 |---|---|---|
-|status_active|ブール|「確認」ボタンの赤点灯表示|
+|status_unconfirm|ブール|「確認」ボタンの赤点灯・点滅表示|
 |status_resetable|ブール|「リセット」ボタンの赤点灯表示|
 |unconfirmed_count|値|未確認アラーム数|
 |active_count|値|発生中アラーム数|
