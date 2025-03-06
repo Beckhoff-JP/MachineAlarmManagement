@@ -40,7 +40,7 @@ VAR
 	
 	(*Listener*)
 	fb_observer : FB_EventObserver;
-	event_table_view : FB_Tc3EventRead;
+	event_table_view : FB_Tc3EventVisualizationView;
 	fbGetTimeZoneInformation	: FB_GetTimeZoneInformation := (bExecute := TRUE);
 	
 	tmp_string : T_MaxString;

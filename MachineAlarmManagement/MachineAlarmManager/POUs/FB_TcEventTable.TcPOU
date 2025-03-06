@@ -27,9 +27,7 @@ VAR
 	active_event_max_index	: UDINT := 1;
 
 	target_active_index : UDINT := 1;
-	target_event_index : UDINT := 1;
-	
-	view_refresh_timer : TON := (PT := T#0.25S);
+	target_event_index : UDINT := 1;	
 	view_refresh_flag : BOOL;
 	
 	view_terminate : BOOL;
@@ -55,6 +53,7 @@ IF await THEN
 				active_event_table[target_active_index]^.event_text,
 				SIZEOF(active_event_table[target_active_index]^.event_text)
 		) THEN
+			_viewer.send_event(active_event_table[target_active_index]^);
 			create_view();
 			await := FALSE;
 		END_IF
@@ -71,12 +70,11 @@ UNTIL
 	NOT __ISVALIDREF(current_event)
 END_REPEAT
 
-// Refresh view cyclically
-view_refresh_timer(IN := NOT view_refresh_timer.Q);
-IF view_refresh_timer.Q AND view_refresh_flag THEN
+// Refresh current aram list view
+IF view_refresh_flag THEN
 	_unconfirmed_event_count := 0;
 	_active_event_count := 0;
-	_viewer.clear();
+	_viewer.clear(); // Once clear whole of items.
 	i := 1;
 	REPEAT
 		IF i <= active_event_max_index THEN
@@ -246,11 +244,11 @@ END_FOR]]></ST>
       </Implementation>
     </Method>
     <Method Name="init_instance" Id="{4f4ba2bf-a3da-4a17-9512-097312ae5cb8}">
-      <Declaration><![CDATA[METHOD init_instance : UDINT;
+      <Declaration><![CDATA[METHOD init_instance : POINTER TO FB_Alarm
 VAR_INPUT
-	eventClass			: GUID;
-	nEventId			: UDINT;
-	eSeverity			: TcEventSeverity;
+	eventClass			: GUID; // イベントクラスのGUID
+	nEventId			: UDINT; // 登録したイベントID
+	eSeverity			: TcEventSeverity; // 重要度
 	bWithConfirmation	: BOOL;
 	bWithResetOperation	: BOOL;
 END_VAR
@@ -271,7 +269,7 @@ event_table[event_max_index].event.Create(
 		);
 event_table[event_max_index].event.bWithResetOperation := bWithResetOperation;
 
-init_instance := event_max_index;
+init_instance := ADR(event_table[event_max_index]);
 ]]></ST>
       </Implementation>
     </Method>
@@ -325,6 +323,7 @@ END_VAR]]></Declaration>
 FOR active_index := 1 TO active_event_max_index DO
 	IF active_event_table[active_index] <> 0 THEN
 		IF active_event_table[active_index]^.event.EqualsTo(fbEvent) THEN
+			_viewer.send_event(active_event_table[active_index]^);
 			active_event_table[active_index] := 0;
 			IF active_index = active_event_max_index THEN
 				active_event_max_index := last_active_index;
@@ -395,7 +394,12 @@ END_VAR
     <LineIds Name="FB_TcEventTable">
       <LineId Id="956" Count="10" />
       <LineId Id="970" Count="0" />
-      <LineId Id="972" Count="44" />
+      <LineId Id="972" Count="4" />
+      <LineId Id="1088" Count="0" />
+      <LineId Id="977" Count="14" />
+      <LineId Id="1089" Count="1" />
+      <LineId Id="1087" Count="0" />
+      <LineId Id="996" Count="20" />
       <LineId Id="1028" Count="0" />
       <LineId Id="1032" Count="0" />
       <LineId Id="1034" Count="2" />
@@ -485,6 +489,7 @@ END_VAR
       <LineId Id="32" Count="0" />
       <LineId Id="14" Count="1" />
       <LineId Id="17" Count="0" />
+      <LineId Id="51" Count="0" />
       <LineId Id="20" Count="0" />
       <LineId Id="22" Count="2" />
       <LineId Id="21" Count="0" />

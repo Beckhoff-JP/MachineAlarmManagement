@@ -65,6 +65,11 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"351"</v>
+              <v n="TextDefault">"MAIN.event_table_view.stAlarmEvents[INDEX].Severity"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"571"</v>
               <v n="TextDefault">"MessageText"</v>
               <l n="LanguageTexts" t="ArrayList" />
@@ -94,6 +99,11 @@
             <o>
               <v n="TextID">"324"</v>
               <v n="TextDefault">"アラーム"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"283"</v>
+              <v n="TextDefault">"テキスト"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
@@ -144,6 +154,11 @@
             <o>
               <v n="TextID">"819"</v>
               <v n="TextDefault">"言語設定"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"136"</v>
+              <v n="TextDefault">"重要度"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
           </l>
