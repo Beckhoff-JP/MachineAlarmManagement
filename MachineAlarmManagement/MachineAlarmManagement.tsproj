@@ -68,7 +68,7 @@
 		</System>
 		<Plc>
 			<Project GUID="{2E705217-A9B8-44ED-BB1E-60D6ED1D9BA4}" Name="MachineAlarmManager" PrjFilePath="MachineAlarmManager\MachineAlarmManager.plcproj" TmcFilePath="MachineAlarmManager\MachineAlarmManager.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="MachineAlarmManager\MachineAlarmManager.tmc" TmcHash="{892F1CD8-5B5F-18A4-AED6-599DF96B3004}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="MachineAlarmManager\MachineAlarmManager.tmc" TmcHash="{F9C4FB9F-5452-51FC-4281-2098D928BA26}">
 					<Name>MachineAlarmManager Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Contexts>

@@ -108,7 +108,7 @@ VAR
 	source_name : STRING;
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[MEMCPY(ADR(stAlarmhistory[2]), ADR(stAlarmhistory), SIZEOF(stAlarmhistory) - SIZEOF(stAlarmhistory[1]));
+        <ST><![CDATA[MEMMOVE(ADR(stAlarmhistory[2]), ADR(stAlarmhistory[1]), ADR(stAlarmhistory[DISP_ROWS - 1]) - ADR(stAlarmhistory[1]));
 
 UTF8_TO_WSTRING(
 	ADR(stAlarmhistory[1].Computer),
