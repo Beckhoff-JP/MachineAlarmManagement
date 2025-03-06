@@ -9,6 +9,13 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
     </Method>
+    <Method Name="send_event" Id="{6944e801-828c-436b-a997-770d62cacb42}">
+      <Declaration><![CDATA[METHOD send_event : BOOL
+VAR_INPUT
+	event_container : REFERENCE TO EventContainer;
+END_VAR
+]]></Declaration>
+    </Method>
     <Method Name="show" Id="{8555b326-6a37-41fd-9f1b-f223bb9aeabd}">
       <Declaration><![CDATA[METHOD show : BOOL
 VAR_INPUT

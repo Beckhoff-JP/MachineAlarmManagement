@@ -47,7 +47,7 @@ get REF= queue_buffer[_read_index];
 
 _usage := _usage - 1;
 
-IF COMMAND_QUEUE_BUFFER_SIZE < _write_index THEN
+IF COMMAND_QUEUE_BUFFER_SIZE > _read_index THEN
 	_read_index := _read_index + 1;
 ELSE
 	_read_index := 1;
@@ -76,7 +76,7 @@ ELSE
 			);
 
 	_usage := _usage + 1;
-	IF COMMAND_QUEUE_BUFFER_SIZE < _write_index THEN
+	IF COMMAND_QUEUE_BUFFER_SIZE > _write_index THEN
 		_write_index := _write_index + 1;
 	ELSE
 		_write_index := 1;

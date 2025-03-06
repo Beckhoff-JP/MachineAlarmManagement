@@ -1,0 +1,277 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <POU Name="FB_Tc3EventVisualizationView" Id="{037aed9e-3ff5-4d2c-aad1-5efc5a7a5632}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Tc3EventVisualizationView IMPLEMENTS InterfaceEventViewer
+VAR CONSTANT
+	DISP_ROWS : UDINT := 80;
+END_VAR
+VAR_INPUT
+	tzinfo : ST_TimeZoneInformation;
+END_VAR
+VAR_OUTPUT
+	stAlarmEvents	: ARRAY [1..DISP_ROWS] OF ST_EventView;
+	stAlarmhistory 	: ARRAY [1..DISP_ROWS] OF ST_EventView;
+END_VAR
+VAR
+	row : UDINT := 1;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="_create_current_table" Id="{68bb58e5-9921-4bf5-9711-a031fb36b796}">
+      <Declaration><![CDATA[METHOD PRIVATE _create_current_table : BOOL
+VAR_INPUT
+	event_container : REFERENCE TO EventContainer;
+	row		: UDINT;
+	stDate	: STRING;
+	stTime	: STRING;
+END_VAR
+VAR
+	iso_datetime : STRING;
+	source_name : STRING;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[UTF8_TO_WSTRING(
+	ADR(stAlarmEvents[row].Computer),
+	ADR(event_container.event.module_name),
+	SIZEOF(stAlarmEvents[row].Computer)
+);
+
+source_name := event_container.event.ipSourceInfo.sName;
+
+UTF8_TO_WSTRING(
+	ADR(stAlarmEvents[row].sSource),
+	ADR(source_name),
+	SIZEOF(stAlarmEvents[row].sSource)
+);
+
+stAlarmEvents[row].bConfirmable := event_container.event.eConfirmationState <> TcEventConfirmationState.NotSupported;
+CASE event_container.event.eSeverity OF 
+	TcEventSeverity.Critical:
+		stAlarmEvents[row].Severity := "危険";		
+	TcEventSeverity.Error:
+		stAlarmEvents[row].Severity := "異常";
+	TcEventSeverity.Info:
+		stAlarmEvents[row].Severity := "情報";
+	TcEventSeverity.Verbose:
+		stAlarmEvents[row].Severity := "ログ";
+	TcEventSeverity.Warning:
+		stAlarmEvents[row].Severity := "警告";
+	ELSE
+		stAlarmEvents[row].Severity := TO_WSTRING(event_container.event.eSeverity);
+END_CASE
+
+CASE event_container.event.eConfirmationState OF 
+	TcEventConfirmationState.Confirmed:
+		stAlarmEvents[row].ConfirmState := "レ";
+	TcEventConfirmationState.WaitForConfirmation:
+		stAlarmEvents[row].ConfirmState := "";
+	ELSE
+		stAlarmEvents[row].ConfirmState := "--";
+END_CASE
+
+stAlarmEvents[row].nEventId := event_container.event.nEventId;
+UTF8_TO_WSTRING(
+	ADR(stAlarmEvents[row].MessageText),
+	ADR(event_container.event_text),
+	SIZEOF(stAlarmEvents[row].MessageText)
+);
+
+
+iso_datetime := FILETIME64_TO_ISO8601(
+					fileTime := event_container.event.nTimeRaised,
+					nBias := TO_INT(tzInfo.bias), 
+					bUTC :=TRUE, 
+					nPrecision := 0
+				);
+stAlarmEvents[row].sDate := MID(iso_datetime, 10, 1);
+stAlarmEvents[row].sTime := MID(iso_datetime, 8, 12);
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="clear" Id="{67504af2-00d8-40a8-85f5-8d6225afe6eb}">
+      <Declaration><![CDATA[METHOD clear : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[row := 1;
+MEMSET(ADR(stAlarmEvents), 0, SIZEOF(stAlarmEvents));]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="send_event" Id="{cade7640-bc91-49b6-907b-34a8298c4e83}">
+      <Declaration><![CDATA[METHOD send_event : BOOL
+VAR_INPUT
+	event_container	: REFERENCE TO EventContainer;
+END_VAR
+VAR
+	iso_datetime : STRING;
+	source_name : STRING;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[MEMCPY(ADR(stAlarmhistory[2]), ADR(stAlarmhistory), SIZEOF(stAlarmhistory) - SIZEOF(stAlarmhistory[1]));
+
+UTF8_TO_WSTRING(
+	ADR(stAlarmhistory[1].Computer),
+	ADR(event_container.event.module_name),
+	SIZEOF(stAlarmhistory[1].Computer)
+);
+
+source_name := event_container.event.ipSourceInfo.sName;
+
+UTF8_TO_WSTRING(
+	ADR(stAlarmhistory[1].sSource),
+	ADR(source_name),
+	SIZEOF(stAlarmhistory[1].sSource)
+);
+
+stAlarmhistory[1].bConfirmable := event_container.event.eConfirmationState <> TcEventConfirmationState.NotSupported;
+CASE event_container.event.eSeverity OF 
+	TcEventSeverity.Critical:
+		stAlarmhistory[1].Severity := "危険";		
+	TcEventSeverity.Error:
+		stAlarmhistory[1].Severity := "異常";
+	TcEventSeverity.Info:
+		stAlarmhistory[1].Severity := "情報";
+	TcEventSeverity.Verbose:
+		stAlarmhistory[1].Severity := "ログ";
+	TcEventSeverity.Warning:
+		stAlarmhistory[1].Severity := "警告";
+	ELSE
+		stAlarmhistory[1].Severity := TO_WSTRING(event_container.event.eSeverity);
+END_CASE
+
+IF event_container.event.bRaised THEN 
+	stAlarmhistory[1].ConfirmState := "発生";
+ELSE
+	stAlarmhistory[1].ConfirmState := "解除";
+END_IF
+
+stAlarmhistory[1].nEventId := event_container.event.nEventId;
+UTF8_TO_WSTRING(
+	ADR(stAlarmhistory[1].MessageText),
+	ADR(event_container.event_text),
+	SIZEOF(stAlarmhistory[1].MessageText)
+);
+
+
+IF event_container.event.bRaised THEN
+	iso_datetime := FILETIME64_TO_ISO8601(
+						fileTime := event_container.event.nTimeRaised,
+						nBias := TO_INT(tzInfo.bias), 
+						bUTC :=TRUE, 
+						nPrecision := 0
+					);
+ELSE
+	iso_datetime := FILETIME64_TO_ISO8601(
+						fileTime := event_container.event.nTimeCleared,
+						nBias := TO_INT(tzInfo.bias), 
+						bUTC :=TRUE, 
+						nPrecision := 0
+					);	
+END_IF
+
+stAlarmhistory[1].sDate := MID(iso_datetime, 10, 1);
+stAlarmhistory[1].sTime := MID(iso_datetime, 8, 12);
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="show" Id="{0c22d4db-f791-4aef-8e7f-c26c35c4cd8d}">
+      <Declaration><![CDATA[METHOD show : BOOL
+VAR_INPUT
+	event_container : REFERENCE TO EventContainer;
+END_VAR
+VAR_INST
+	iso_datetime : STRING;
+END_VAR
+VAR
+	stDate	: STRING;
+	stTime	: STRING;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT __ISVALIDREF(event_container) OR row > DISP_ROWS THEN
+	show := TRUE;
+	RETURN;
+END_IF
+
+iso_datetime := FILETIME64_TO_ISO8601(
+					fileTime := event_container.event.nTimeRaised,
+					nBias := TO_INT(tzInfo.bias), 
+					bUTC :=TRUE, 
+					nPrecision := 0
+				);
+
+stDate := MID(iso_datetime, 10, 1);
+stTime := MID(iso_datetime, 8, 12);
+
+_create_current_table(event_container, row, stDate, stTime);
+			
+row := row + 1;
+show := FALSE;]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_Tc3EventVisualizationView">
+      <LineId Id="42" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Tc3EventVisualizationView._create_current_table">
+      <LineId Id="59" Count="3" />
+      <LineId Id="57" Count="0" />
+      <LineId Id="74" Count="1" />
+      <LineId Id="64" Count="5" />
+      <LineId Id="14" Count="12" />
+      <LineId Id="77" Count="1" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="80" Count="2" />
+      <LineId Id="84" Count="0" />
+      <LineId Id="93" Count="1" />
+      <LineId Id="85" Count="0" />
+      <LineId Id="87" Count="0" />
+      <LineId Id="83" Count="0" />
+      <LineId Id="79" Count="0" />
+      <LineId Id="30" Count="1" />
+      <LineId Id="53" Count="1" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="55" Count="0" />
+      <LineId Id="32" Count="10" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Tc3EventVisualizationView.clear">
+      <LineId Id="7" Count="0" />
+      <LineId Id="4" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Tc3EventVisualizationView.send_event">
+      <LineId Id="7" Count="0" />
+      <LineId Id="9" Count="14" />
+      <LineId Id="27" Count="16" />
+      <LineId Id="106" Count="0" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="107" Count="0" />
+      <LineId Id="50" Count="7" />
+      <LineId Id="104" Count="0" />
+      <LineId Id="58" Count="1" />
+      <LineId Id="92" Count="4" />
+      <LineId Id="85" Count="0" />
+      <LineId Id="97" Count="0" />
+      <LineId Id="99" Count="4" />
+      <LineId Id="98" Count="0" />
+      <LineId Id="74" Count="0" />
+      <LineId Id="91" Count="0" />
+      <LineId Id="66" Count="2" />
+      <LineId Id="8" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Tc3EventVisualizationView.show">
+      <LineId Id="347" Count="3" />
+      <LineId Id="422" Count="0" />
+      <LineId Id="424" Count="4" />
+      <LineId Id="423" Count="0" />
+      <LineId Id="430" Count="0" />
+      <LineId Id="436" Count="0" />
+      <LineId Id="431" Count="0" />
+      <LineId Id="439" Count="0" />
+      <LineId Id="438" Count="0" />
+      <LineId Id="437" Count="0" />
+      <LineId Id="387" Count="0" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
