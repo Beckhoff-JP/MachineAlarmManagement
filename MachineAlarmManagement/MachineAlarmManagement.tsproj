@@ -46,11 +46,9 @@
 			</Hides>
 		</DataType>
 	</DataTypes>
-	<Project ProjectGUID="{8E95978D-1F34-4A29-9ADC-6F2EBF2E2930}" Target64Bit="true" ShowHideConfigurations="#x6">
+	<Project ProjectGUID="{8E95978D-1F34-4A29-9ADC-6F2EBF2E2930}" TargetNetId="169.254.170.186.1.1" Target64Bit="true" ShowHideConfigurations="#x6">
 		<System>
-			<Settings MaxCpus="12" NonWinCpus="3">
-				<Cpu CpuId="11"/>
-			</Settings>
+			<Settings MaxCpus="4" NonWinCpus="2"/>
 			<Licenses>
 				<Target>
 					<ManualSelect>{0070B910-0995-4F44-83BF-D1E141B4D8C3}</ManualSelect>
@@ -68,7 +66,7 @@
 		</System>
 		<Plc>
 			<Project GUID="{2E705217-A9B8-44ED-BB1E-60D6ED1D9BA4}" Name="MachineAlarmManager" PrjFilePath="MachineAlarmManager\MachineAlarmManager.plcproj" TmcFilePath="MachineAlarmManager\MachineAlarmManager.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="MachineAlarmManager\MachineAlarmManager.tmc" TmcHash="{F9C4FB9F-5452-51FC-4281-2098D928BA26}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="MachineAlarmManager\MachineAlarmManager.tmc" TmcHash="{D3848222-604C-01C3-63F7-A967C6D4E008}">
 					<Name>MachineAlarmManager Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Contexts>

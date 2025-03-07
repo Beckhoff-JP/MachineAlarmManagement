@@ -122,6 +122,11 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"714"</v>
+              <v n="TextDefault">"履歴消去"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"601"</v>
               <v n="TextDefault">"日付"</v>
               <l n="LanguageTexts" t="ArrayList" />

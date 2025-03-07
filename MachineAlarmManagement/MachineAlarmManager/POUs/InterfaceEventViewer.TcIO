@@ -9,6 +9,12 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
     </Method>
+    <Method Name="history_clear" Id="{2f8fe953-1f5f-4c5e-88cf-74b8b2f74278}">
+      <Declaration><![CDATA[METHOD history_clear : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+    </Method>
     <Method Name="send_event" Id="{6944e801-828c-436b-a997-770d62cacb42}">
       <Declaration><![CDATA[METHOD send_event : BOOL
 VAR_INPUT

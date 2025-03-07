@@ -26,6 +26,8 @@ VAR
 	is_info						: BOOL;
 	confirm_button_input		: BOOL;
 	reset_button_input			: BOOL;
+	history_clear_button_input	: BOOL;
+	history_clear_delay_timer	: TON;
 
 	// output to HMI
 	status_unconfirm				: BOOL;
@@ -149,6 +151,12 @@ IF unconfirmed_count > 0 THEN
 	END_IF
 ELSE
 	status_unconfirm := status_active;
+END_IF
+
+// 履歴の消去(5秒長押し）
+history_clear_delay_timer(IN := history_clear_button_input, PT := T#5S);
+IF history_clear_delay_timer.Q THEN
+	fb_observer.event_table.viewer.history_clear();
 END_IF]]></ST>
     </Implementation>
     <LineIds Name="MAIN">
@@ -178,6 +186,12 @@ END_IF]]></ST>
       <LineId Id="1392" Count="0" />
       <LineId Id="1271" Count="12" />
       <LineId Id="1133" Count="0" />
+      <LineId Id="1451" Count="0" />
+      <LineId Id="1450" Count="0" />
+      <LineId Id="1457" Count="0" />
+      <LineId Id="1453" Count="0" />
+      <LineId Id="1452" Count="0" />
+      <LineId Id="1455" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

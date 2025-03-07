@@ -8,7 +8,7 @@ END_VAR
 VAR_INPUT
 	tzinfo : ST_TimeZoneInformation;
 END_VAR
-VAR_OUTPUT
+VAR_OUTPUT PERSISTENT
 	stAlarmEvents	: ARRAY [1..DISP_ROWS] OF ST_EventView;
 	stAlarmhistory 	: ARRAY [1..DISP_ROWS] OF ST_EventView;
 END_VAR
@@ -96,6 +96,14 @@ stAlarmEvents[row].sTime := MID(iso_datetime, 8, 12);
       <Implementation>
         <ST><![CDATA[row := 1;
 MEMSET(ADR(stAlarmEvents), 0, SIZEOF(stAlarmEvents));]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="history_clear" Id="{f7b10d81-b982-4727-b675-63f191ddb8c5}">
+      <Declaration><![CDATA[{warning 'add method implementation '}
+METHOD history_clear : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[MEMSET(ADR(stAlarmhistory), 0, SIZEOF(stAlarmhistory));]]></ST>
       </Implementation>
     </Method>
     <Method Name="send_event" Id="{cade7640-bc91-49b6-907b-34a8298c4e83}">
@@ -237,6 +245,9 @@ show := FALSE;]]></ST>
     </LineIds>
     <LineIds Name="FB_Tc3EventVisualizationView.clear">
       <LineId Id="7" Count="0" />
+      <LineId Id="4" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Tc3EventVisualizationView.history_clear">
       <LineId Id="4" Count="0" />
     </LineIds>
     <LineIds Name="FB_Tc3EventVisualizationView.send_event">

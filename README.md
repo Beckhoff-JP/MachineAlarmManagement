@@ -290,6 +290,48 @@ ELSE
 END_IF
 ```
 
+#### 履歴のクリア
+
+「履歴消去」ボタン入力をMAINプログラムの `history_clear_button_input` に割り当てています。下記の通り5秒長押しすることで履歴消去を行うメソッドを呼び出します。
+
+``` pascal
+VAR
+    history_clear_button_input	: BOOL;
+    history_clear_delay_timer	: TON;
+END_VAR
+
+// 履歴の消去(5秒長押し)
+history_clear_delay_timer(IN := history_clear_button_input, PT := T#5S);
+IF history_clear_delay_timer.Q THEN
+    fb_observer.event_table.viewer.history_clear();
+END_IF
+```
+
 ## Visualizationの所在
 
 PLCプロジェクトの `VISUs` / `Visualization` が親画面となり、現在発生中アラームは`current`、アラーム履歴は`history`で個画面となっていて、タブ切り替えできる仕様です。
+
+## その他注意
+
+Visualizationに表示するアラーム一覧、履歴テーブルは、`FB_Tc3EventVisualizationView` の出力変数に割り当てられています。このテーブルデータはPERSISTENT属性が付加されていますので、正常にシャットダウンした場合に限り、永続化されています。
+
+意図しないシャットダウン時にも直前の状態を保持するためには、UPSおよびPERSISTENT変数を保持するためのファンクションブロック制御が必要です。詳細は下記をご覧ください。
+
+[https://beckhoff-jp.github.io/TwinCATHowTo/data_persistence/index.html](https://beckhoff-jp.github.io/TwinCATHowTo/data_persistence/index.html)
+
+``` pascal
+FUNCTION_BLOCK FB_Tc3EventVisualizationView IMPLEMENTS InterfaceEventViewer
+VAR CONSTANT
+    DISP_ROWS : UDINT := 80;
+END_VAR
+VAR_INPUT
+    tzinfo : ST_TimeZoneInformation;
+END_VAR
+VAR_OUTPUT PERSISTENT
+    stAlarmEvents	: ARRAY [1..DISP_ROWS] OF ST_EventView;
+    stAlarmhistory 	: ARRAY [1..DISP_ROWS] OF ST_EventView;
+END_VAR
+VAR
+    row : UDINT := 1;
+END_VAR
+```
