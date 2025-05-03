@@ -1,0 +1,154 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <POU Name="FB_Subject" Id="{6ed8c9cd-86ba-4ebc-ba32-2dcbc2e1f434}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Subject IMPLEMENTS InterfaceEventViewer
+VAR CONSTANT
+	MAX_EVENTS : UDINT := 10;
+END_VAR
+VAR
+	event_containers	: ARRAY [1..MAX_EVENTS] OF InterfaceEventViewer;
+	max_index			: UDINT;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="clear" Id="{580ee6da-d3b7-42e4-898e-f42aa81df34e}">
+      <Declaration><![CDATA[{warning 'add method implementation '}
+METHOD clear : BOOL
+VAR
+	i : UDINT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[FOR i := 1 TO max_index DO
+	IF event_containers[i] <> 0 THEN
+		event_containers[i].clear();
+	END_IF
+END_FOR]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="history_clear" Id="{6cfa058d-9ed8-4cb2-b7af-8a6728d3c7d9}">
+      <Declaration><![CDATA[{warning 'add method implementation '}
+METHOD history_clear : BOOL
+VAR
+	i : UDINT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[FOR i := 1 TO max_index DO
+	IF event_containers[i] <> 0 THEN
+		event_containers[i].history_clear();
+	END_IF
+END_FOR]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="send_event" Id="{6c7126ec-fc35-4109-87ac-3644d2cc1d03}">
+      <Declaration><![CDATA[{warning 'add method implementation '}
+METHOD send_event : BOOL
+VAR_INPUT
+	event_container	: REFERENCE TO EventContainer;
+END_VAR
+VAR
+	i : UDINT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[FOR i := 1 TO max_index DO
+	IF event_containers[i] <> 0 THEN
+		event_containers[i].send_event(event_container);
+	END_IF
+END_FOR]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="show" Id="{4bba132d-4ddc-4512-9240-4527f3c06f89}">
+      <Declaration><![CDATA[{warning 'add method implementation '}
+METHOD show : BOOL
+VAR_INPUT
+	event_container	: REFERENCE TO EventContainer;
+END_VAR
+VAR
+	i : UDINT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[FOR i := 1 TO max_index DO
+	IF event_containers[i] <> 0 THEN
+		event_containers[i].show(event_container);
+	END_IF
+END_FOR]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="subscribe" Id="{84e41b96-1fc0-4513-9b69-b0b5199d83a0}">
+      <Declaration><![CDATA[METHOD subscribe : UDINT
+VAR_INPUT
+	observable	: InterfaceEventViewer;
+END_VAR
+VAR
+	i : UDINT;
+END_VAR
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[subscribe := 0;
+FOR i := 1 TO MAX_EVENTS DO
+	IF event_containers[i] = 0 THEN
+		event_containers[i] := observable;
+		IF i > max_index THEN
+			max_index := i;
+		END_IF
+		subscribe := i;
+		RETURN;
+	END_IF
+END_FOR]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="unsubscribe" Id="{0f0923f2-7ad9-4d02-8ee4-ac2ac38832ed}">
+      <Declaration><![CDATA[METHOD unsubscribe : BOOL
+VAR_INPUT
+	subscriber : UDINT;
+END_VAR
+VAR
+	i : UDINT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF event_containers[subscriber] <> 0 THEN
+	event_containers[subscriber] := 0;
+	IF subscriber = max_index THEN
+		FOR i := max_index TO 0 BY -1 DO
+			IF event_containers[i] <> 0 THEN
+				max_index := 1;
+			END_IF
+		END_FOR
+	END_IF
+	unsubscribe := TRUE;
+ELSE
+	unsubscribe := FALSE;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_Subject">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Subject.clear">
+      <LineId Id="7" Count="3" />
+      <LineId Id="4" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Subject.history_clear">
+      <LineId Id="7" Count="3" />
+      <LineId Id="4" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Subject.send_event">
+      <LineId Id="13" Count="3" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Subject.show">
+      <LineId Id="13" Count="3" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Subject.subscribe">
+      <LineId Id="12" Count="9" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Subject.unsubscribe">
+      <LineId Id="11" Count="12" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

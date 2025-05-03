@@ -392,19 +392,7 @@ END_VAR
       </Set>
     </Property>
     <LineIds Name="FB_TcEventTable">
-      <LineId Id="956" Count="10" />
-      <LineId Id="970" Count="0" />
-      <LineId Id="972" Count="4" />
-      <LineId Id="1088" Count="0" />
-      <LineId Id="977" Count="14" />
-      <LineId Id="1089" Count="1" />
-      <LineId Id="1087" Count="0" />
-      <LineId Id="996" Count="20" />
-      <LineId Id="1028" Count="0" />
-      <LineId Id="1032" Count="0" />
-      <LineId Id="1034" Count="2" />
-      <LineId Id="1043" Count="2" />
-      <LineId Id="1047" Count="4" />
+      <LineId Id="1157" Count="69" />
       <LineId Id="403" Count="0" />
     </LineIds>
     <LineIds Name="FB_TcEventTable.active_event_count.Get">

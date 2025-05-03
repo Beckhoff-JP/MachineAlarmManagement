@@ -41,8 +41,10 @@ VAR
     bReadEvents          : BOOL;
 	
 	(*Listener*)
-	fb_observer : FB_EventObserver;
-	event_table_view : FB_Tc3EventVisualizationView;
+	fb_observer			: FB_EventObserver;
+	subject				: FB_Subject;
+	event_table_view 	: FB_Tc3EventVisualizationView;
+	event_iot_exporter	: FB_EventIoTExporter;		// IoT exporter
 	fbGetTimeZoneInformation	: FB_GetTimeZoneInformation := (bExecute := TRUE);
 	
 	tmp_string : T_MaxString;
@@ -64,7 +66,9 @@ IF NOT init THEN
 			bWithResetOperation := GVL.AlarmDatabase[i].bWithResetOperation
 		);
 	END_FOR
-	fb_observer.event_table.viewer := event_table_view;
+	fb_observer.event_table.viewer := subject;
+	subject.subscribe(event_table_view);
+	subject.subscribe(event_iot_exporter);
 	init := TRUE;
 END_IF
 
@@ -162,7 +166,10 @@ END_IF]]></ST>
     <LineIds Name="MAIN">
       <LineId Id="1195" Count="9" />
       <LineId Id="1331" Count="0" />
-      <LineId Id="1205" Count="19" />
+      <LineId Id="1205" Count="1" />
+      <LineId Id="1508" Count="1" />
+      <LineId Id="1507" Count="0" />
+      <LineId Id="1208" Count="16" />
       <LineId Id="1379" Count="1" />
       <LineId Id="1226" Count="13" />
       <LineId Id="1381" Count="0" />

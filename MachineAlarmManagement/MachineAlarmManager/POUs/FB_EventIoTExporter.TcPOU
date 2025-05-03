@@ -1,0 +1,141 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <POU Name="FB_EventIoTExporter" Id="{8194870f-80e5-48cc-9062-7a48f44737ce}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_EventIoTExporter IMPLEMENTS InterfaceEventViewer
+VAR_INPUT
+	tzinfo : ST_TimeZoneInformation;
+END_VAR
+VAR_OUTPUT
+	export_event : ST_EventView;
+END_VAR
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="clear" Id="{e300ba77-2c0e-4b57-b938-50d10b136472}">
+      <Declaration><![CDATA[{warning 'add method implementation '}
+METHOD clear : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="history_clear" Id="{387e2cd7-0b47-433f-89e4-60da0f7a4953}">
+      <Declaration><![CDATA[{warning 'add method implementation '}
+METHOD history_clear : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="send_event" Id="{3b874412-bd46-4068-904a-e07474905b56}">
+      <Declaration><![CDATA[{warning 'add method implementation '}
+METHOD send_event : BOOL
+VAR_INPUT
+	event_container	: REFERENCE TO EventContainer;
+END_VAR
+VAR
+	iso_datetime : STRING;
+	source_name : STRING;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF event_container.event.bRaised THEN
+	UTF8_TO_WSTRING(
+		ADR(export_event.Computer),
+		ADR(event_container.event.module_name),
+		SIZEOF(export_event.Computer)
+	);
+	
+	source_name := event_container.event.ipSourceInfo.sName;
+	
+	UTF8_TO_WSTRING(
+		ADR(export_event.sSource),
+		ADR(source_name),
+		SIZEOF(export_event.sSource)
+	);
+	
+	export_event.bConfirmable := event_container.event.eConfirmationState <> TcEventConfirmationState.NotSupported;
+	CASE event_container.event.eSeverity OF 
+		TcEventSeverity.Critical:
+			export_event.Severity := "危険";		
+		TcEventSeverity.Error:
+			export_event.Severity := "異常";
+		TcEventSeverity.Info:
+			export_event.Severity := "情報";
+		TcEventSeverity.Verbose:
+			export_event.Severity := "ログ";
+		TcEventSeverity.Warning:
+			export_event.Severity := "警告";
+		ELSE
+			export_event.Severity := TO_WSTRING(event_container.event.eSeverity);
+	END_CASE
+	
+	IF event_container.event.bRaised THEN 
+		export_event.ConfirmState := "発生";
+	ELSE
+		export_event.ConfirmState := "解除";
+	END_IF
+	
+	export_event.nEventId := event_container.event.nEventId;
+	UTF8_TO_WSTRING(
+		ADR(export_event.MessageText),
+		ADR(event_container.event_text),
+		SIZEOF(export_event.MessageText)
+	);
+	
+	
+	IF event_container.event.bRaised THEN
+		iso_datetime := FILETIME64_TO_ISO8601(
+							fileTime := event_container.event.nTimeRaised,
+							nBias := TO_INT(tzInfo.bias), 
+							bUTC :=TRUE, 
+							nPrecision := 0
+						);
+	ELSE
+		iso_datetime := FILETIME64_TO_ISO8601(
+							fileTime := event_container.event.nTimeCleared,
+							nBias := TO_INT(tzInfo.bias), 
+							bUTC :=TRUE, 
+							nPrecision := 0
+						);	
+	END_IF
+	
+	export_event.sDate := MID(iso_datetime, 10, 1);
+	export_event.sTime := MID(iso_datetime, 8, 12);
+END_IF
+
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="show" Id="{85c5b3f3-7b74-4fc5-af14-9395b7991d3b}">
+      <Declaration><![CDATA[{warning 'add method implementation '}
+METHOD show : BOOL
+VAR_INPUT
+	event_container	: REFERENCE TO EventContainer;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_EventIoTExporter">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_EventIoTExporter.clear">
+      <LineId Id="4" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_EventIoTExporter.history_clear">
+      <LineId Id="4" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_EventIoTExporter.send_event">
+      <LineId Id="14" Count="65" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_EventIoTExporter.show">
+      <LineId Id="7" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
