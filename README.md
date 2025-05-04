@@ -26,16 +26,21 @@ VAR_GLOBAL CONSTANT
 END_VAR
 ```
 
-### グローバル変数の定義
+<a id="secion_define_alarm_spec"> </a>
+### アラーム仕様定義
 
-`GVLs` > `GVL` に、それぞれのアラームの振る舞い仕様を設定します。
+`AlarmManager`プログラムの変数定義部に定義された`AlarmDatabase`変数に、個々のアラームの振る舞い仕様を設定します。
+
+|引数|型|説明|
+|--|--|--|
+|nEventId|UDINT|登録したイベントID|
+|eSeverity|[TcEventSeverity](https://infosys.beckhoff.com/content/1033/tc3_eventlogger/5286329611.html?id=7153189202325781619)|重要度|
+|bWithResetOperation|BOOL|新規アラームと確認済みアラームの区別が必要か否か|
+|bWithResetOperation|BOOL|アラーム解除のリセット操作が必要か否か|
 
 ``` pascal
-VAR_GLOBAL CONSTANT
-    // Database ID
-    TARGET_DBID : UINT := 1;
-END_VAR
-VAR_GLOBAL
+VAR
+    :
     (*
     eSeverity ::
     TYPE TcEventSeverity : (
@@ -47,18 +52,18 @@ VAR_GLOBAL
     END_TYPE
     *)
     AlarmDatabase : ARRAY [1..AlarmEventParam.ALARM_MAX_COUNT] OF ST_EventMetadata := [
-        (    
-            nEventId := 1,                // イベントID 1 
-            eSeverity := 3,             // TcEventSeverity
-            bWithConfirmation := TRUE,    // 新規アラームと確認済みアラームの区別が必要か否か
-            bWithResetOperation := TRUE    // アラーム解除のリセット操作が必要か否か
+        (	
+            nEventId := 1,				// イベントID 1 
+            eSeverity := 3, 			// TcEventSeverity
+            bWithConfirmation := TRUE,	// 新規アラームと確認済みアラームの区別が必要か否か
+            bWithResetOperation := TRUE	// アラーム解除のリセット操作が必要か否か
         ),
-        (    nEventId := 2, 
+        (   nEventId := 2, 
             eSeverity := 2, 
             bWithConfirmation := TRUE,
-            bWithResetOperation := FALSE
+            bWithResetOperation := FALSE    
         ),
-        (    nEventId := 3, 
+        (   nEventId := 3, 
             eSeverity := 1, 
             bWithConfirmation := FALSE,
             bWithResetOperation := TRUE
@@ -67,63 +72,52 @@ VAR_GLOBAL
 END_VAR
 ```
 
-### メインプログラム定義
-
-#### アラーム初期化
-
-まず、PLC スタート後1サイクルだけ実行されるプログラムで、初期化を行います。
-アラーム制御オブジェクトは、`fb_observer.event_table` ( `FB_TcEventTable` ) 内に格納されています。
-この中の、`init_instance()` メソッドを使って登録したイベントクラスのイベントと関連付けやオプションを次の通り引数で定義します。
-
-|引数|型|説明|
-|--|--|--|
-|eventClass|GUID|イベントクラスのGUIDを指定します。`TC_EVENT_CLASSES`に続いて作成したイベントクラス名を指定します。|
-|nEventId|UDINT|登録したイベントID|
-|eSeverity|[TcEventSeverity](https://infosys.beckhoff.com/content/1033/tc3_eventlogger/5286329611.html?id=7153189202325781619)|重要度|
-|bWithResetOperation|BOOL|新規アラームと確認済みアラームの区別が必要か否か|
-|bWithResetOperation|BOOL|アラーム解除のリセット操作が必要か否か|
-
-サンプルプログラムではPLCスタート後一度だけ、 `GVL.AlarmDatabase` で定義したものを順次展開するプログラムとしています。
+また、プログラム中では初期化ロジック部にセットしている、前節でイベントクラスへ登録したイベントクラス名を定義します。
 
 ``` pascal
-PROGRAM MAIN
-VAR
-    // Alarm calculation function block
-    init : BOOL;
-    fb_observer : FB_EventObserver;
-    event_table_view : FB_Tc3EventVisualizationView;
-    i : UINT;
-END_VAR
-
 (*
-    FB_Observer内の FB_Alarm インスタンス配列に対して、GVL.AlarmDatabseで定義したイベントクラスの情報で紐付ける。
+	FB_Observer内の FB_Alarm インスタンス配列に対して、GVL.AlarmDatabseで定義したイベントクラスの情報で紐付ける。
 *)
 IF NOT init THEN
     FOR i := 1 TO AlarmEventParam.ALARM_MAX_COUNT DO
-        // init_instance() 
         fb_observer.event_table.init_instance(
-            eventClass := TC_EVENT_CLASSES.UserEventClass,
-            nEventId := GVL.AlarmDatabase[i].nEventId,
-            eSeverity := GVL.AlarmDatabase[i].eSeverity,
-            bWithConfirmation := GVL.AlarmDatabase[i].bWithConfirmation,
-            bWithResetOperation := GVL.AlarmDatabase[i].bWithResetOperation
+            eventClass := TC_EVENT_CLASSES.UserEventClass,     // ← 前節でイベントクラスへ登録したイベントクラス名をここへ定義します。
+            nEventId := AlarmDatabase[i].nEventId,
+            eSeverity := AlarmDatabase[i].eSeverity,
+            bWithConfirmation := AlarmDatabase[i].bWithConfirmation,
+            bWithResetOperation := AlarmDatabase[i].bWithResetOperation
         );
+        alarm_instance REF= fb_observer.event_table.get_alarm(i);
+        GVL.fb_alarm[i] := ADR(alarm_instance);
     END_FOR
-    // イベント集計結果を表示する `InterfaceEventViewer` の実装オブジェクトをセットします。
-    // ここでは Visualization のビューに特化した `FB_Tc3EventVisualizationView` のインスタンスを与えます。
-    fb_observer.event_table.viewer := event_table_view; 
+    fb_observer.event_table.viewer := subject;
+    subject.subscribe(event_table_view);
+    subject.subscribe(event_iot_exporter);
     init := TRUE;
 END_IF
 ```
 
-#### アラーム発報御部
+### メインプログラム
 
-次に個々のアラームの発報制御プログラムを記述します。
+メインプログラムでは次のコードが毎サイクル実行します。
 
-まず、アラームの制御オブジェクトへの参照を `get_alarm(<init_instance()を使って登録した順番>)` を使って取り出し、操作を行います。
-もしくは、先ほどの初期化メソッド `event_table.init_instance()` を実行した際の戻り値には、アラーム制御オブジェクトのポインタが戻ります。`TC_Alarm`へのポインタ型の配列を用意して格納した上で、こちらからお使い頂く方法でも構いません。
+``` pascal
+AlarmManager();
+GVL.event_initialized := AlarmManager.init;
+UserProgram();
+```
 
-取り出したアラームオブジェクト `alarm_instance` は、基本的に次のBOOL型の入力変数を制御することでアラーム発報、確認、解除状態を変更できます。
+AlarmManagerプログラム
+    : アラームの初期化、アラーム集計とVisualizationへの表示連携など、マシンのアラーム処理に関する処理が集約されています。アラームの初期化が行われるとプログラムの出力変数 `init` がTRUEとなります。これをグローバル変数 `GVL.event_initialized` に展開します。
+
+UserProgramプログラム
+    : アラームを発報する処理を定義します。アラーム状態の制御だけではなく、状況に応じてアラームテキストに付加する引数(arguments)をセットします。
+
+
+### ユーザプログラムにおけるアラーム制御
+
+[アラーム仕様定義](#secion_define_alarm_spec) で定義したイベントの配列順序に対応したアラームオブジェクトのポインタの配列が `GVL.fb_alarm` に格納されます。
+このオブジェクトには次の入力変数が用意されていますので、個々に操作してください。
 
 |変数|説明|備考|
 |--|--|--|
@@ -131,9 +125,7 @@ END_IF
 |set_confirm|TRUEへの立ち上がりで確認済み状態へ遷移する|初期化時に `bWithConfirmation` がTRUEの場合のみ有効。|
 |set_clear|TRUEへの立ち上がりでアラーム解除する。ただし、set_activateがTRUEの場合は解除できない。|初期化時に `bWithResetOperation` がTRUEの場合のみ有効。|
 
-また、インターロックを設けるためアラームが発生している状態かどうかを調べるには、`alarm_instance.bActie` プロパティを参照してください。
-
-ラダープログラムにおいては、 `set_activate` をコイルとして出力するだけでアラーム制御可能です。また、`bWithResetOperation` がTRUEでラッチされたアラームである場合は、別途 `set_clear` をTRUEにしてください。
+インターロックを設けるためアラームが発生している状態かどうかを調べるには `bActie` プロパティを参照してください。
 
 #### エラーコード等を付加するには
 
@@ -159,57 +151,83 @@ END_IF
 * E_ArgType.ARGTYPE_ULARGE
 * E_ArgType.ARGTYPE_LARGE
 
+サンプルプログラムは以下の通りです。Visualizationのディップスイッチにより操作されるBOOL変数 `is_alarm`, `is_warning`, `is_info` がそれぞれ用意されています。
+
 ``` pascal
+PROGRAM UserProgram
 VAR
-    alarm_instance      : REFERENCE TO FB_Alarm;
-    error_argument      : INT := 0;
-    error_code_random   : DRAND;
-    tmp_string          : T_MaxString;
+	// input FROM HMI
+	is_error					: BOOL;
+	is_warning					: BOOL;
+	is_info						: BOOL;
+	
+	error_argument				: INT := 0;
+	error_code_random			: DRAND; 
+	tmp_string 					: STRING(255);
 END_VAR
 
-// アラーム1 （Alarmレベル） 発報制御
-alarm_instance REF= fb_observer.event_table.get_alarm(1);            // 1番目のエラー配列に作成した FB_Alarm インスタンス参照を取り出す
-IF __ISVALIDREF(alarm_instance) THEN        
-    IF is_error THEN                                                // is_errorが エラー状態 bit
-        error_code_random(Seed := 1);
-        error_argument := TO_INT(error_code_random.Num * 32767.0);    // 疑似的に乱数によりエラーコードを生成
-        alarm_instance.ipArguments.Clear();                            // Event Class に登録したEventのDisplay text の {0} {1} に展開した文字をクリアにする。
-        tmp_string := 'Error Code';                                    // F_STRING() の引数は VAR_IN_OUT なのでリテラルは使えない。一旦仮変数にセットする。
-        alarm_instance.add_arguments(F_STRING(tmp_string));            // Event Class に登録したEventのDisplay text の {0} 部分に埋め込まれる値。 T_Arg型でセット。
-        alarm_instance.add_arguments(F_Int(error_argument));        // Event Class に登録したEventのDisplay text の {1} 部分に埋め込まれる値。 T_Arg型でセット。
-    END_IF
-    alarm_instance.set_activate := is_error;                        // エラー状態の通知。エラーテキストに　{0} や {1} などの付加的な情報が無ければこの 1 行だけで良い。
+// Simply set "GVL.fb_alarm[*]^.set_activate" true when alarm is activated.
+// 
+
+IF GVL.event_initialized THEN
+	// アラーム1　（Alarmレベル） 発報制御
+	IF is_error THEN												// is_errorが エラー状態 bit
+		error_code_random(Seed := 1);
+		error_argument := TO_INT(error_code_random.Num * 32767.0);	// 疑似的に乱数によりエラーコードを生成
+		GVL.fb_alarm[1]^.ipArguments.Clear();							// Event Class に登録したEventのDisplay text の {0} {1} に展開した文字をクリアにする。
+		tmp_string := 'Error Code';									// F_STRING() の引数は VAR_IN_OUT なのでリテラルは使えない。一旦仮変数にセットする。
+		GVL.fb_alarm[1]^.add_arguments(F_STRING(tmp_string));			// Event Class に登録したEventのDisplay text の {0} 部分に埋め込まれる値。 T_Arg型でセット。
+		GVL.fb_alarm[1]^.add_arguments(F_Int(error_argument));		// Event Class に登録したEventのDisplay text の {1} 部分に埋め込まれる値。 T_Arg型でセット。
+	END_IF
+	GVL.fb_alarm[1]^.set_activate := is_error;						// エラー状態の通知。エラーテキストに　{0} や {1} などの付加的な情報が無ければこの 1 行だけで良い。
+	
+	// アラーム2　（Warningレベル） 発報制御
+	IF is_warning THEN
+		error_code_random(Seed := 1);
+		error_argument := TO_INT(error_code_random.Num * 32767.0);
+		GVL.fb_alarm[2]^.ipArguments.Clear();
+		tmp_string := 'Warning Code';	
+		GVL.fb_alarm[2]^.add_arguments(F_STRING(tmp_string));
+		GVL.fb_alarm[2]^.add_arguments(F_Int(error_argument));
+	END_IF
+	GVL.fb_alarm[2]^.set_activate := is_warning;
+	
+	
+	// アラーム3　（Informationレベル） 発報制御
+	IF is_info THEN
+		error_code_random(Seed := 1);
+		error_argument := TO_INT(error_code_random.Num * 32767.0);
+		GVL.fb_alarm[3]^.ipArguments.Clear();
+		tmp_string := 'Status';
+		GVL.fb_alarm[3]^.add_arguments(F_STRING(tmp_string));
+		GVL.fb_alarm[3]^.add_arguments(F_Int(error_argument));
+	END_IF
+	GVL.fb_alarm[3]^.set_activate := is_info;
 END_IF
 
-// アラーム2（Warningレベル）発報制御
-alarm_instance REF= fb_observer.event_table.get_alarm(2);
-IF __ISVALIDREF(alarm_instance) THEN    
-    IF is_warning THEN
-        error_code_random(Seed := 1);
-        error_argument := TO_INT(error_code_random.Num * 32767.0);
-        alarm_instance.ipArguments.Clear();
-        tmp_string := 'Warning Code';    
-        alarm_instance.add_arguments(F_STRING(tmp_string));
-        alarm_instance.add_arguments(F_Int(error_argument));
-    END_IF
-    alarm_instance.set_activate := is_warning;
-END_IF
-
-
-// アラーム3（Informationレベル） 発報制御
-alarm_instance REF= fb_observer.event_table.get_alarm(3);
-IF __ISVALIDREF(alarm_instance) THEN
-    IF is_info THEN
-        error_code_random(Seed := 1);
-        error_argument := TO_INT(error_code_random.Num * 32767.0);
-        alarm_instance.ipArguments.Clear();
-        tmp_string := 'Status';
-        alarm_instance.add_arguments(F_STRING(tmp_string));
-        alarm_instance.add_arguments(F_Int(error_argument));
-    END_IF
-    alarm_instance.set_activate := is_info;
-END_IF
 ```
+
+
+#### プログラム解説
+
+AlarmManager内の初期化処理内には以下の行があります。これにより `GVL.fb_alarm` の配列変数にアラームオブジェクト `FB_Alarm` のポインタが格納されます。
+
+``` pascal
+GVL.fb_alarm[i] := ADR(alarm_instance);
+```
+
+`GVL.fb_alarm` 配列要素となる `FB_Alarm` オブジェクトは、[アラーム仕様定義](#secion_define_alarm_spec) で定義したイベントに対応します。
+
+```{warning}
+配列の順序はイベントIDとは異なる点にご注意ください。[アラーム仕様定義](#secion_define_alarm_spec) で定義した `eventClass` および `nEventID` に対応します。
+```
+
+`FB_Alarm` オブジェクトには次の入力変数が用意されていて、次の入力変数を持ちます。これらの変数を操作する事でアラームの状態を操作できます。
+
+
+### Visualization連携
+
+Visualizationとの連携は、`AlarmManager` プログラムに記述されています。
 
 #### 一斉アラーム確認、一斉アラーム解除ボタン制御
 

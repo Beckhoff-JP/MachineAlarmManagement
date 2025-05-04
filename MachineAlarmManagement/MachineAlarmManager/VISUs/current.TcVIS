@@ -389,7 +389,7 @@
                     </o>
                     <o>
                       <v n="Id">72808681L</v>
-                      <v n="Value">"MAIN.event_table_view.stAlarmEvents"</v>
+                      <v n="Value">"AlarmManager.event_table_view.stAlarmEvents"</v>
                     </o>
                     <o>
                       <v n="Id">1636615684L</v>
@@ -417,22 +417,22 @@
                           <v>Bool</v>
                         </a>
                         <a n="ColumnNames" cet="String">
-                          <v>MAIN.event_table_view.stAlarmEvents[INDEX].nSourceId</v>
-                          <v>MAIN.event_table_view.stAlarmEvents[INDEX].nEventId</v>
-                          <v>MAIN.event_table_view.stAlarmEvents[INDEX].Severity</v>
-                          <v>MAIN.event_table_view.stAlarmEvents[INDEX].ConfirmState</v>
-                          <v>MAIN.event_table_view.stAlarmEvents[INDEX].sDate</v>
-                          <v>MAIN.event_table_view.stAlarmEvents[INDEX].sTime</v>
-                          <v>MAIN.event_table_view.stAlarmEvents[INDEX].Computer</v>
-                          <v>MAIN.event_table_view.stAlarmEvents[INDEX].sSource</v>
-                          <v>MAIN.event_table_view.stAlarmEvents[INDEX].MessageText</v>
-                          <v>MAIN.event_table_view.stAlarmEvents[INDEX].bQuitMessage</v>
-                          <v>MAIN.event_table_view.stAlarmEvents[INDEX].bConfirmable</v>
+                          <v>AlarmManager.event_table_view.stAlarmEvents[INDEX].nSourceId</v>
+                          <v>AlarmManager.event_table_view.stAlarmEvents[INDEX].nEventId</v>
+                          <v>AlarmManager.event_table_view.stAlarmEvents[INDEX].Severity</v>
+                          <v>AlarmManager.event_table_view.stAlarmEvents[INDEX].ConfirmState</v>
+                          <v>AlarmManager.event_table_view.stAlarmEvents[INDEX].sDate</v>
+                          <v>AlarmManager.event_table_view.stAlarmEvents[INDEX].sTime</v>
+                          <v>AlarmManager.event_table_view.stAlarmEvents[INDEX].Computer</v>
+                          <v>AlarmManager.event_table_view.stAlarmEvents[INDEX].sSource</v>
+                          <v>AlarmManager.event_table_view.stAlarmEvents[INDEX].MessageText</v>
+                          <v>AlarmManager.event_table_view.stAlarmEvents[INDEX].bQuitMessage</v>
+                          <v>AlarmManager.event_table_view.stAlarmEvents[INDEX].bConfirmable</v>
                         </a>
                         <v n="BaseType">false</v>
                         <a n="Bounds" cet="ArrayBound">
                           <o>
-                            <v n="Identifier">"MAIN.event_table_view.DISP_ROWS"</v>
+                            <v n="Identifier">"AlarmManager.event_table_view.DISP_ROWS"</v>
                             <v n="Value">80</v>
                           </o>
                         </a>
@@ -489,51 +489,51 @@
                     </o>
                     <o>
                       <v n="Id">3854506369L</v>
-                      <v n="Value">"MAIN.event_table_view.stAlarmEvents[INDEX].nSourceId"</v>
+                      <v n="Value">"AlarmManager.event_table_view.stAlarmEvents[INDEX].nSourceId"</v>
                     </o>
                     <o>
                       <v n="Id">1892666644L</v>
-                      <v n="Value">"MAIN.event_table_view.stAlarmEvents[INDEX].nEventId"</v>
+                      <v n="Value">"AlarmManager.event_table_view.stAlarmEvents[INDEX].nEventId"</v>
                     </o>
                     <o>
                       <v n="Id">338671338L</v>
-                      <v n="Value">"MAIN.event_table_view.stAlarmEvents[INDEX].Severity"</v>
+                      <v n="Value">"AlarmManager.event_table_view.stAlarmEvents[INDEX].Severity"</v>
                     </o>
                     <o>
                       <v n="Id">2170511999L</v>
-                      <v n="Value">"MAIN.event_table_view.stAlarmEvents[INDEX].ConfirmState"</v>
+                      <v n="Value">"AlarmManager.event_table_view.stAlarmEvents[INDEX].ConfirmState"</v>
                     </o>
                     <o>
                       <v n="Id">3723444502L</v>
-                      <v n="Value">"MAIN.event_table_view.stAlarmEvents[INDEX].sDate"</v>
+                      <v n="Value">"AlarmManager.event_table_view.stAlarmEvents[INDEX].sDate"</v>
                     </o>
                     <o>
                       <v n="Id">1218418051L</v>
-                      <v n="Value">"MAIN.event_table_view.stAlarmEvents[INDEX].sTime"</v>
+                      <v n="Value">"AlarmManager.event_table_view.stAlarmEvents[INDEX].sTime"</v>
                     </o>
                     <o>
                       <v n="Id">746581629L</v>
-                      <v n="Value">"MAIN.event_table_view.stAlarmEvents[INDEX].Computer"</v>
+                      <v n="Value">"AlarmManager.event_table_view.stAlarmEvents[INDEX].Computer"</v>
                     </o>
                     <o>
                       <v n="Id">3104783080L</v>
-                      <v n="Value">"MAIN.event_table_view.stAlarmEvents[INDEX].sSource"</v>
+                      <v n="Value">"AlarmManager.event_table_view.stAlarmEvents[INDEX].sSource"</v>
                     </o>
                     <o>
                       <v n="Id">2501879983L</v>
-                      <v n="Value">"MAIN.event_table_view.stAlarmEvents[INDEX].MessageText"</v>
+                      <v n="Value">"AlarmManager.event_table_view.stAlarmEvents[INDEX].MessageText"</v>
                     </o>
                     <o>
                       <v n="Id">7306298L</v>
-                      <v n="Value">"MAIN.event_table_view.stAlarmEvents[INDEX].bQuitMessage"</v>
+                      <v n="Value">"AlarmManager.event_table_view.stAlarmEvents[INDEX].bQuitMessage"</v>
                     </o>
                     <o>
                       <v n="Id">1933151965L</v>
-                      <v n="Value">"MAIN.event_table_view.stAlarmEvents[INDEX].bConfirmable"</v>
+                      <v n="Value">"AlarmManager.event_table_view.stAlarmEvents[INDEX].bConfirmable"</v>
                     </o>
                     <o>
                       <v n="Id">2232123230L</v>
-                      <v n="Value">"MAIN.event_table_view.stAlarmEvents[INDEX].nSourceId"</v>
+                      <v n="Value">"AlarmManager.event_table_view.stAlarmEvents[INDEX].nSourceId"</v>
                     </o>
                     <o>
                       <v n="Id">511219082L</v>
@@ -557,11 +557,11 @@
                     </o>
                     <o>
                       <v n="Id">1757482276L</v>
-                      <v n="Value">"MAIN.event_table_view.stAlarmEvents[INDEX].Computer"</v>
+                      <v n="Value">"AlarmManager.event_table_view.stAlarmEvents[INDEX].Computer"</v>
                     </o>
                     <o>
                       <v n="Id">4088588272L</v>
-                      <v n="Value">"MAIN.event_table_view.stAlarmEvents[INDEX].sSource"</v>
+                      <v n="Value">"AlarmManager.event_table_view.stAlarmEvents[INDEX].sSource"</v>
                     </o>
                     <o>
                       <v n="Id">2243050616L</v>
@@ -569,55 +569,55 @@
                     </o>
                     <o>
                       <v n="Id">516019884L</v>
-                      <v n="Value">"MAIN.event_table_view.stAlarmEvents[INDEX].bQuitMessage"</v>
+                      <v n="Value">"AlarmManager.event_table_view.stAlarmEvents[INDEX].bQuitMessage"</v>
                     </o>
                     <o>
                       <v n="Id">1739542657L</v>
-                      <v n="Value">"MAIN.event_table_view.stAlarmEvents[INDEX].bConfirmable"</v>
+                      <v n="Value">"AlarmManager.event_table_view.stAlarmEvents[INDEX].bConfirmable"</v>
                     </o>
                     <o>
                       <v n="Id">2685023577L</v>
-                      <v n="Value">"MAIN.event_table_view.stAlarmEvents[INDEX].nSourceId"</v>
+                      <v n="Value">"AlarmManager.event_table_view.stAlarmEvents[INDEX].nSourceId"</v>
                     </o>
                     <o>
                       <v n="Id">3312258591L</v>
-                      <v n="Value">"MAIN.event_table_view.stAlarmEvents[INDEX].nEventId"</v>
+                      <v n="Value">"AlarmManager.event_table_view.stAlarmEvents[INDEX].nEventId"</v>
                     </o>
                     <o>
                       <v n="Id">1791247317L</v>
-                      <v n="Value">"MAIN.event_table_view.stAlarmEvents[INDEX].Severity"</v>
+                      <v n="Value">"AlarmManager.event_table_view.stAlarmEvents[INDEX].Severity"</v>
                     </o>
                     <o>
                       <v n="Id">262371475L</v>
-                      <v n="Value">"MAIN.event_table_view.stAlarmEvents[INDEX].ConfirmState"</v>
+                      <v n="Value">"AlarmManager.event_table_view.stAlarmEvents[INDEX].ConfirmState"</v>
                     </o>
                     <o>
                       <v n="Id">4008173056L</v>
-                      <v n="Value">"MAIN.event_table_view.stAlarmEvents[INDEX].sDate"</v>
+                      <v n="Value">"AlarmManager.event_table_view.stAlarmEvents[INDEX].sDate"</v>
                     </o>
                     <o>
                       <v n="Id">2340480326L</v>
-                      <v n="Value">"MAIN.event_table_view.stAlarmEvents[INDEX].sTime"</v>
+                      <v n="Value">"AlarmManager.event_table_view.stAlarmEvents[INDEX].sTime"</v>
                     </o>
                     <o>
                       <v n="Id">606709900L</v>
-                      <v n="Value">"MAIN.event_table_view.stAlarmEvents[INDEX].Computer"</v>
+                      <v n="Value">"AlarmManager.event_table_view.stAlarmEvents[INDEX].Computer"</v>
                     </o>
                     <o>
                       <v n="Id">1095668682L</v>
-                      <v n="Value">"MAIN.event_table_view.stAlarmEvents[INDEX].sSource"</v>
+                      <v n="Value">"AlarmManager.event_table_view.stAlarmEvents[INDEX].sSource"</v>
                     </o>
                     <o>
                       <v n="Id">1037165547L</v>
-                      <v n="Value">"MAIN.event_table_view.stAlarmEvents[INDEX].MessageText"</v>
+                      <v n="Value">"AlarmManager.event_table_view.stAlarmEvents[INDEX].MessageText"</v>
                     </o>
                     <o>
                       <v n="Id">1488378029L</v>
-                      <v n="Value">"MAIN.event_table_view.stAlarmEvents[INDEX].bQuitMessage"</v>
+                      <v n="Value">"AlarmManager.event_table_view.stAlarmEvents[INDEX].bQuitMessage"</v>
                     </o>
                     <o>
                       <v n="Id">152217274L</v>
-                      <v n="Value">"MAIN.event_table_view.stAlarmEvents[INDEX].bConfirmable"</v>
+                      <v n="Value">"AlarmManager.event_table_view.stAlarmEvents[INDEX].bConfirmable"</v>
                     </o>
                     <o>
                       <v n="Id">4036189354L</v>
@@ -633,11 +633,11 @@
                     </o>
                     <o>
                       <v n="Id">2115787593L</v>
-                      <v n="Value">40</v>
+                      <v n="Value" t="Int16">45</v>
                     </o>
                     <o>
                       <v n="Id">1960399440L</v>
-                      <v n="Value" t="Int16">70</v>
+                      <v n="Value" t="Int16">75</v>
                     </o>
                     <o>
                       <v n="Id">3094565582L</v>
@@ -914,6 +914,38 @@
                     <o>
                       <v n="Id">2913178531L</v>
                       <v n="Value">"283"</v>
+                    </o>
+                    <o>
+                      <v n="Id">2367776008L</v>
+                      <v n="Value">"15"</v>
+                    </o>
+                    <o>
+                      <v n="Id">3597700437L</v>
+                      <v n="Value">false</v>
+                    </o>
+                    <o>
+                      <v n="Id">1893244285L</v>
+                      <v n="Value">"30"</v>
+                    </o>
+                    <o>
+                      <v n="Id">176242795L</v>
+                      <v n="Value">"601"</v>
+                    </o>
+                    <o>
+                      <v n="Id">2766787066L</v>
+                      <v n="Value">"947"</v>
+                    </o>
+                    <o>
+                      <v n="Id">2570132370L</v>
+                      <v n="Value">false</v>
+                    </o>
+                    <o>
+                      <v n="Id">129119772L</v>
+                      <v n="Value">false</v>
+                    </o>
+                    <o>
+                      <v n="Id">228485359L</v>
+                      <v n="Value">false</v>
                     </o>
                   </l>
                 </o>

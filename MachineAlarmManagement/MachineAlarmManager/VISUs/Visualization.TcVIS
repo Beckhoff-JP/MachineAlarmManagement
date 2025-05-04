@@ -16,7 +16,7 @@
                       <l n="VisualElemMemberList" t="VisualElemMemberCollection" cet="VisualElemMember">
                         <o>
                           <v n="Id">1186196937L</v>
-                          <v n="Value">"MAIN.confirm_button_input"</v>
+                          <v n="Value">"AlarmManager.confirm_button_input"</v>
                         </o>
                       </l>
                     </o>
@@ -67,7 +67,7 @@
                     </o>
                     <o>
                       <v n="Id">1647042231L</v>
-                      <v n="Value">"&lt;toggle/tap variable&gt;"</v>
+                      <v n="Value">"AlarmManager.confirm_button_input"</v>
                     </o>
                     <o>
                       <v n="Id">2812299069L</v>
@@ -175,7 +175,7 @@
                     </o>
                     <o>
                       <v n="Id">1999528970L</v>
-                      <v n="Value">"MAIN.status_unconfirm"</v>
+                      <v n="Value">"AlarmManager.status_unconfirm"</v>
                     </o>
                     <o>
                       <v n="Id">2175578022L</v>
@@ -281,7 +281,7 @@
                     </o>
                     <o>
                       <v n="Id">743958181L</v>
-                      <v n="Value">"MAIN.is_error"</v>
+                      <v n="Value">"UserProgram.is_error"</v>
                     </o>
                     <o>
                       <v n="Id">2597686782L</v>
@@ -311,7 +311,7 @@
                       <l n="VisualElemMemberList" t="VisualElemMemberCollection" cet="VisualElemMember">
                         <o>
                           <v n="Id">1186196937L</v>
-                          <v n="Value">"MAIN.reset_button_input"</v>
+                          <v n="Value">"AlarmManager.reset_button_input"</v>
                         </o>
                       </l>
                     </o>
@@ -362,7 +362,7 @@
                     </o>
                     <o>
                       <v n="Id">1647042231L</v>
-                      <v n="Value">"&lt;toggle/tap variable&gt;"</v>
+                      <v n="Value">"AlarmManager.reset_button_input"</v>
                     </o>
                     <o>
                       <v n="Id">2812299069L</v>
@@ -462,7 +462,7 @@
                     </o>
                     <o>
                       <v n="Id">1999528970L</v>
-                      <v n="Value">"MAIN.status_resetable"</v>
+                      <v n="Value">"AlarmManager.status_resetable"</v>
                     </o>
                     <o>
                       <v n="Id">2597686782L</v>
@@ -572,7 +572,7 @@
                     </o>
                     <o>
                       <v n="Id">743958181L</v>
-                      <v n="Value">"MAIN.is_warning"</v>
+                      <v n="Value">"UserProgram.is_warning"</v>
                     </o>
                   </l>
                 </o>
@@ -674,7 +674,7 @@
                     </o>
                     <o>
                       <v n="Id">743958181L</v>
-                      <v n="Value">"MAIN.is_info"</v>
+                      <v n="Value">"UserProgram.is_info"</v>
                     </o>
                   </l>
                 </o>
@@ -768,7 +768,7 @@
                     </o>
                     <o>
                       <v n="Id">743958181L</v>
-                      <v n="Value">"MAIN.is_error"</v>
+                      <v n="Value">"UserProgram.is_error"</v>
                     </o>
                   </l>
                 </o>
@@ -862,7 +862,7 @@
                     </o>
                     <o>
                       <v n="Id">743958181L</v>
-                      <v n="Value">"MAIN.is_warning"</v>
+                      <v n="Value">"UserProgram.is_warning"</v>
                     </o>
                   </l>
                 </o>
@@ -956,7 +956,7 @@
                     </o>
                     <o>
                       <v n="Id">743958181L</v>
-                      <v n="Value">"MAIN.is_info"</v>
+                      <v n="Value">"UserProgram.is_info"</v>
                     </o>
                   </l>
                 </o>
@@ -1499,7 +1499,7 @@
                     </o>
                     <o>
                       <v n="Id">2477733581L</v>
-                      <v n="Value">"MAIN.unconfirmed_count"</v>
+                      <v n="Value">"AlarmManager.unconfirmed_count"</v>
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
@@ -1659,7 +1659,7 @@
                     </o>
                     <o>
                       <v n="Id">2477733581L</v>
-                      <v n="Value">"MAIN.active_count"</v>
+                      <v n="Value">"AlarmManager.active_count"</v>
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
@@ -3992,7 +3992,7 @@
                     </o>
                     <o>
                       <v n="Id">397264524L</v>
-                      <v n="Value">"MAIN.lang_select_options"</v>
+                      <v n="Value">"AlarmManager.lang_select_options"</v>
                     </o>
                     <o>
                       <v n="Id">2597686782L</v>
@@ -4022,7 +4022,7 @@
                       <l n="VisualElemMemberList" t="VisualElemMemberCollection" cet="VisualElemMember">
                         <o>
                           <v n="Id">1186196937L</v>
-                          <v n="Value">"MAIN.history_clear_button_input"</v>
+                          <v n="Value">"AlarmManager.history_clear_button_input"</v>
                         </o>
                       </l>
                     </o>

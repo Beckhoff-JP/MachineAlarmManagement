@@ -150,7 +150,13 @@
     <Compile Include="POUs\InterfaceEventViewer.TcIO">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="POUs\AlarmManager.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="POUs\MAIN.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\UserProgram.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Visualization Manager.TcVMO">

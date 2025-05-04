@@ -1,0 +1,72 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <POU Name="UserProgram" Id="{ef3a3bca-cce4-40dc-8865-485e9da978e5}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM UserProgram
+VAR
+	// input FROM HMI
+	is_error					: BOOL;
+	is_warning					: BOOL;
+	is_info						: BOOL;
+	
+	error_argument				: INT := 0;
+	error_code_random			: DRAND; 
+	tmp_string 					: STRING(255);
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Simply set "GVL.fb_alarm[*]^.set_activate" true when alarm is activated.
+// 
+
+IF GVL.event_initialized THEN
+	// アラーム1　（Alarmレベル） 発報制御
+	IF is_error THEN												// is_errorが エラー状態 bit
+		error_code_random(Seed := 1);
+		error_argument := TO_INT(error_code_random.Num * 32767.0);	// 疑似的に乱数によりエラーコードを生成
+		GVL.fb_alarm[1]^.ipArguments.Clear();							// Event Class に登録したEventのDisplay text の {0} {1} に展開した文字をクリアにする。
+		tmp_string := 'Error Code';									// F_STRING() の引数は VAR_IN_OUT なのでリテラルは使えない。一旦仮変数にセットする。
+		GVL.fb_alarm[1]^.add_arguments(F_STRING(tmp_string));			// Event Class に登録したEventのDisplay text の {0} 部分に埋め込まれる値。 T_Arg型でセット。
+		GVL.fb_alarm[1]^.add_arguments(F_Int(error_argument));		// Event Class に登録したEventのDisplay text の {1} 部分に埋め込まれる値。 T_Arg型でセット。
+	END_IF
+	GVL.fb_alarm[1]^.set_activate := is_error;						// エラー状態の通知。エラーテキストに　{0} や {1} などの付加的な情報が無ければこの 1 行だけで良い。
+	
+	// アラーム2　（Warningレベル） 発報制御
+	IF is_warning THEN
+		error_code_random(Seed := 1);
+		error_argument := TO_INT(error_code_random.Num * 32767.0);
+		GVL.fb_alarm[2]^.ipArguments.Clear();
+		tmp_string := 'Warning Code';	
+		GVL.fb_alarm[2]^.add_arguments(F_STRING(tmp_string));
+		GVL.fb_alarm[2]^.add_arguments(F_Int(error_argument));
+	END_IF
+	GVL.fb_alarm[2]^.set_activate := is_warning;
+	
+	
+	// アラーム3　（Informationレベル） 発報制御
+	IF is_info THEN
+		error_code_random(Seed := 1);
+		error_argument := TO_INT(error_code_random.Num * 32767.0);
+		GVL.fb_alarm[3]^.ipArguments.Clear();
+		tmp_string := 'Status';
+		GVL.fb_alarm[3]^.add_arguments(F_STRING(tmp_string));
+		GVL.fb_alarm[3]^.add_arguments(F_Int(error_argument));
+	END_IF
+	GVL.fb_alarm[3]^.set_activate := is_info;
+END_IF
+]]></ST>
+    </Implementation>
+    <LineIds Name="UserProgram">
+      <LineId Id="102" Count="0" />
+      <LineId Id="104" Count="0" />
+      <LineId Id="103" Count="0" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="52" Count="0" />
+      <LineId Id="55" Count="8" />
+      <LineId Id="65" Count="1" />
+      <LineId Id="69" Count="8" />
+      <LineId Id="79" Count="2" />
+      <LineId Id="84" Count="8" />
+      <LineId Id="51" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

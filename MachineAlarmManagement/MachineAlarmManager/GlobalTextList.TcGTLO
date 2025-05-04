@@ -16,6 +16,11 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"15"</v>
+              <v n="TextDefault">"AlarmManager.event_table_view.stAlarmEvents[INDEX].Computer"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"562"</v>
               <v n="TextDefault">"Critical"</v>
               <l n="LanguageTexts" t="ArrayList" />

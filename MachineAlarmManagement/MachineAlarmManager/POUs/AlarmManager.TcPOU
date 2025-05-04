@@ -1,0 +1,156 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <POU Name="AlarmManager" Id="{72dad8bd-ec6a-4433-9e7f-c5409f588bdc}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM AlarmManager
+VAR_OUTPUT
+	init : BOOL;	
+END_VAR
+VAR
+(* Alarm control *)	
+	// Alarm calculation function block
+	i : UINT;
+	
+	(*User variables*)
+	// User alarm event
+	error_condition					: BOOL;
+	warning_condition				: BOOL;
+	info_condition					: BOOL;
+
+	error_argument				: INT := 0;
+	error_code_random			: DRAND; 
+
+	// input FROM HMI
+	confirm_button_input		: BOOL;
+	reset_button_input			: BOOL;
+	history_clear_button_input	: BOOL;
+	history_clear_delay_timer	: TON;
+
+	// output to HMI
+	status_unconfirm				: BOOL;
+	unconfirmed_count				: UDINT;
+	status_active					: BOOL;
+	active_count					: UDINT;
+	status_resetable				: BOOL;
+	blink_timer				: TON := (PT := T#0.5S);
+	
+	(* For Visualization *)
+    bReadEvents          : BOOL;
+	
+	(*Listener*)
+	fb_observer : FB_EventObserver;
+	subject				: FB_Subject;
+	event_table_view 	: FB_Tc3EventVisualizationView;
+	event_iot_exporter	: FB_EventIoTExporter;		// IoT exporter
+	fbGetTimeZoneInformation	: FB_GetTimeZoneInformation := (bExecute := TRUE);
+	
+	tmp_string : T_MaxString;
+	lang_select_options : UDINT := 1;
+	
+	alarm_instance : REFERENCE TO FB_ALarm;
+	
+	(*
+	eSeverity ::
+	TYPE TcEventSeverity : (
+		Verbose  := 0, 
+		Info     := 1, 
+		Warning  := 2, 
+		Error    := 3, 
+		Critical := 4);
+	END_TYPE
+	*)
+	AlarmDatabase : ARRAY [1..AlarmEventParam.ALARM_MAX_COUNT] OF ST_EventMetadata := [
+		(	
+			nEventId := 1,				// イベントID 1 
+			eSeverity := 3, 			// TcEventSeverity
+			bWithConfirmation := TRUE,	// 新規アラームと確認済みアラームの区別が必要か否か
+			bWithResetOperation := TRUE	// アラーム解除のリセット操作が必要か否か
+		),
+		(	nEventId := 2, 
+			eSeverity := 2, 
+			bWithConfirmation := TRUE,
+			bWithResetOperation := FALSE
+		),
+		(	nEventId := 3, 
+			eSeverity := 1, 
+			bWithConfirmation := FALSE,
+			bWithResetOperation := TRUE
+		)
+	];
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[(*
+	FB_Observer内の FB_Alarm インスタンス配列に対して、GVL.AlarmDatabseで定義したイベントクラスの情報で紐付ける。
+*)
+IF NOT init THEN
+	FOR i := 1 TO AlarmEventParam.ALARM_MAX_COUNT DO
+		fb_observer.event_table.init_instance(
+			eventClass := TC_EVENT_CLASSES.UserEventClass,
+			nEventId := AlarmDatabase[i].nEventId,
+			eSeverity := AlarmDatabase[i].eSeverity,
+			bWithConfirmation := AlarmDatabase[i].bWithConfirmation,
+			bWithResetOperation := AlarmDatabase[i].bWithResetOperation
+		);
+		alarm_instance REF= fb_observer.event_table.get_alarm(i);
+		GVL.fb_alarm[i] := ADR(alarm_instance);
+	END_FOR
+	fb_observer.event_table.viewer := subject;
+	subject.subscribe(event_table_view);
+	subject.subscribe(event_iot_exporter);
+	init := TRUE;
+END_IF
+
+//　アラームリセットボタン受付
+IF reset_button_input THEN
+	fb_observer.event_table.try_clear_all_alarm();
+END_IF
+
+// アラーム確認ボタン受付
+IF confirm_button_input THEN
+	fb_observer.event_table.confirm_all_alarm();
+END_IF
+
+
+// IPCのロケール設定の読み出しと、Visualization向けイベントテーブル表示FBへのタイムゾーン情報設定
+IF fbGetTimeZoneInformation.bBusy THEN
+	fbGetTimeZoneInformation.bExecute := FALSE;		
+END_IF
+fbGetTimeZoneInformation();
+event_table_view.tzinfo := fbGetTimeZoneInformation.tzInfo;
+event_iot_exporter.tzinfo := fbGetTimeZoneInformation.tzInfo;
+
+// オブザーバ（監視）オブジェクトの実行
+CASE lang_select_options OF
+	0: fb_observer.nLangId := 1033;
+	1: fb_observer.nLangId := 1041;
+END_CASE
+fb_observer(event_class := TC_EVENT_CLASSES.UserEventClass);
+
+// 表示用の変数制御　（アクティブアラーム数、未確認アラーム数、ボタン点滅制御、リセット可能状態）
+active_count := fb_observer.event_table.active_event_count;
+status_active := active_count > 0;
+unconfirmed_count := fb_observer.event_table.unconfirmed_event_count;
+
+status_resetable := fb_observer.event_table.set_event_count = 0 AND status_active;
+
+IF unconfirmed_count > 0 THEN
+	blink_timer(IN := NOT blink_timer.Q);
+	IF blink_timer.Q THEN
+		status_unconfirm := NOT status_unconfirm;
+	END_IF
+ELSE
+	status_unconfirm := status_active;
+END_IF
+
+// 履歴の消去(5秒長押し）
+history_clear_delay_timer(IN := history_clear_button_input, PT := T#5S);
+IF history_clear_delay_timer.Q THEN
+	fb_observer.event_table.viewer.history_clear();
+END_IF]]></ST>
+    </Implementation>
+    <LineIds Name="AlarmManager">
+      <LineId Id="95" Count="66" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -6,34 +6,8 @@
 	TARGET_DBID : UINT := 1;
 END_VAR
 VAR_GLOBAL
-	(*
-	eSeverity ::
-	TYPE TcEventSeverity : (
-		Verbose  := 0, 
-		Info     := 1, 
-		Warning  := 2, 
-		Error    := 3, 
-		Critical := 4);
-	END_TYPE
-	*)
-	AlarmDatabase : ARRAY [1..AlarmEventParam.ALARM_MAX_COUNT] OF ST_EventMetadata := [
-		(	
-			nEventId := 1,				// イベントID 1 
-			eSeverity := 3, 			// TcEventSeverity
-			bWithConfirmation := TRUE,	// 新規アラームと確認済みアラームの区別が必要か否か
-			bWithResetOperation := TRUE	// アラーム解除のリセット操作が必要か否か
-		),
-		(	nEventId := 2, 
-			eSeverity := 2, 
-			bWithConfirmation := TRUE,
-			bWithResetOperation := FALSE
-		),
-		(	nEventId := 3, 
-			eSeverity := 1, 
-			bWithConfirmation := FALSE,
-			bWithResetOperation := TRUE
-		)
-	];
+	 fb_alarm 		: ARRAY [1..AlarmEventParam.ALARM_MAX_COUNT] OF POINTER TO FB_Alarm;
+	 event_initialized	: BOOL;
 END_VAR]]></Declaration>
   </GVL>
 </TcPlcObject>
